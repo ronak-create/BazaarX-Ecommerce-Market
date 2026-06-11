@@ -1,6 +1,13 @@
 import { redirect } from "next/navigation";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { prisma, SellerStatus, type SellerProfile, type User, type UserRole } from "@bazaarx/db";
+import {
+  prisma,
+  SellerStatus,
+  type ResellerProfile,
+  type SellerProfile,
+  type User,
+  type UserRole,
+} from "@bazaarx/db";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -89,4 +96,31 @@ export async function requireApprovedSellerPage(): Promise<SellerProfile> {
   const seller = await getSellerProfile();
   if (!seller || seller.status !== SellerStatus.APPROVED) redirect("/seller/onboarding");
   return seller;
+}
+
+/** Reseller status is additive (any user can opt in); gated by profile existence. */
+export async function getResellerProfile(): Promise<ResellerProfile | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  return prisma.resellerProfile.findUnique({ where: { userId: user.id } });
+}
+
+/** API guard: caller must have a reseller profile. */
+export async function authorizeReseller(): Promise<
+  | { ok: true; user: User; reseller: ResellerProfile }
+  | { ok: false; status: 401 | 403 }
+> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, status: 401 };
+  const reseller = await prisma.resellerProfile.findUnique({ where: { userId: user.id } });
+  if (!reseller) return { ok: false, status: 403 };
+  return { ok: true, user, reseller };
+}
+
+/** Server-component guard for reseller pages; redirects non-resellers to opt-in. */
+export async function requireResellerPage(): Promise<ResellerProfile> {
+  await requireUser();
+  const reseller = await getResellerProfile();
+  if (!reseller) redirect("/reseller/join");
+  return reseller;
 }

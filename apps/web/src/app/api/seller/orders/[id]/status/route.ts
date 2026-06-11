@@ -58,7 +58,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       });
     }
 
-    // A completed return restocks and refunds.
+    // A completed return restocks, refunds, and voids any pending commission.
     if (to === OrderStatus.RETURNED) {
       for (const i of order.items) {
         await tx.productVariant.update({
@@ -71,6 +71,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           where: { id: order.payment.id },
           data: { status: PaymentStatus.REFUNDED },
         });
+      }
+      const commission = await tx.commission.findUnique({ where: { orderId: order.id } });
+      if (commission && commission.status === "PENDING") {
+        await tx.resellerProfile.update({
+          where: { id: commission.resellerId },
+          data: { pendingEarnings: { decrement: commission.amount } },
+        });
+        await tx.commission.delete({ where: { id: commission.id } });
       }
     }
 

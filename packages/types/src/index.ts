@@ -327,6 +327,72 @@ export interface VerifyPaymentInput {
   razorpaySignature: string;
 }
 
+// ──────────────────────────── Reseller ────────────────────────────
+
+export interface CreateLinkInput {
+  productId: string;
+  margin: string; // decimal as string, added per unit
+}
+
+export interface ResellerLinkDTO {
+  id: string;
+  productId: string;
+  productName: string;
+  productSlug: string;
+  margin: string;
+  slug: string;
+  shareUrl: string;
+  clicks: number;
+  conversions: number;
+}
+
+export interface ResellerDashboardDTO {
+  totalEarnings: string;
+  pendingEarnings: string;
+  linkCount: number;
+  totalConversions: number;
+}
+
+export interface CommissionDTO {
+  id: string;
+  orderId: string;
+  amount: string;
+  status: "PENDING" | "PAID";
+  productName: string;
+  createdAt: string;
+}
+
+// ──────────────────────────── Reviews ────────────────────────────
+
+export interface CreateReviewInput {
+  productId: string;
+  orderId: string;
+  rating: number;
+  title?: string;
+  body?: string;
+  images?: string[];
+}
+
+export interface ReviewDTO {
+  id: string;
+  rating: number;
+  title: string | null;
+  body: string | null;
+  images: string[];
+  helpfulCount: number;
+  authorName: string;
+  createdAt: string;
+  isMine: boolean;
+}
+
+export interface ReviewSummaryDTO {
+  reviews: ReviewDTO[];
+  avgRating: number;
+  totalReviews: number;
+  /** An order id the caller can review this product against, if eligible. */
+  eligibleOrderId: string | null;
+}
+
 /** Storage buckets accepted by POST /api/upload/sign. */
 export type UploadBucket = "products" | "kyc" | "reviews";
 

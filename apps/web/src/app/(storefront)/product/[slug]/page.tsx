@@ -4,6 +4,8 @@ import { prisma, ProductStatus } from "@bazaarx/db";
 import { toProductDTO } from "@/lib/product-schema";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { ProductBuyBox } from "@/components/storefront/product-buy-box";
+import { ResellerShare } from "@/components/reseller/reseller-share";
+import { ReviewsSection } from "@/components/storefront/reviews-section";
 
 export const dynamic = "force-dynamic";
 
@@ -55,12 +57,16 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
             <div className="font-medium">{product.seller.businessName}</div>
           </div>
 
+          <ResellerShare productId={dto.id} />
+
           <div className="prose-sm">
             <h2 className="mb-1 text-sm font-semibold">Description</h2>
             <p className="whitespace-pre-line text-sm text-slate-600">{dto.description}</p>
           </div>
         </div>
       </div>
+
+      <ReviewsSection productId={dto.id} />
     </div>
   );
 }

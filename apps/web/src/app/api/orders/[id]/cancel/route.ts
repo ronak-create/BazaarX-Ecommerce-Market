@@ -43,6 +43,16 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       });
     }
 
+    // Void any pending reseller commission for this order.
+    const commission = await tx.commission.findUnique({ where: { orderId: order.id } });
+    if (commission && commission.status === "PENDING") {
+      await tx.resellerProfile.update({
+        where: { id: commission.resellerId },
+        data: { pendingEarnings: { decrement: commission.amount } },
+      });
+      await tx.commission.delete({ where: { id: commission.id } });
+    }
+
     await notify({
       tx,
       userId: order.seller.userId,

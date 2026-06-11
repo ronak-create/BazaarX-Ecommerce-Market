@@ -62,6 +62,11 @@ export function UserMenu() {
           Sell on BazaarX
         </Link>
       )}
+      {profile.isReseller && (
+        <Link href="/reseller" className="text-brand hover:underline">
+          Reseller
+        </Link>
+      )}
       <Button variant="outline" onClick={signOut}>
         Sign out
       </Button>
