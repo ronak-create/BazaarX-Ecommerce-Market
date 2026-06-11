@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 // Route prefixes that require an authenticated session.
-const PROTECTED_PREFIXES = ["/seller", "/admin", "/reseller", "/account"];
+const PROTECTED_PREFIXES = ["/seller", "/admin", "/reseller", "/account", "/checkout", "/orders"];
 
 export async function middleware(request: NextRequest) {
   const { response, user } = await updateSession(request);

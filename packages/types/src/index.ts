@@ -226,6 +226,107 @@ export interface WishlistItemDTO {
   avgRating: number;
 }
 
+// ──────────────────────────── Addresses ────────────────────────────
+
+export interface AddressInput {
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault?: boolean;
+}
+
+export interface AddressDTO extends AddressInput {
+  id: string;
+  line2: string;
+  isDefault: boolean;
+}
+
+// ──────────────────────────── Orders & Payments ────────────────────────────
+
+export type OrderStatusDTO =
+  | "PLACED"
+  | "CONFIRMED"
+  | "SHIPPED"
+  | "OUT_FOR_DELIVERY"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "RETURN_REQUESTED"
+  | "RETURNED";
+
+export type PaymentMethodDTO = "RAZORPAY" | "COD";
+export type PaymentStatusDTO = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+
+export interface CreateOrderInput {
+  addressId: string;
+  paymentMethod: PaymentMethodDTO;
+}
+
+export interface OrderItemDTO {
+  id: string;
+  productId: string;
+  productName: string;
+  productSlug: string;
+  variantLabel: string;
+  quantity: number;
+  unitPrice: string;
+  totalPrice: string;
+  image: string | null;
+}
+
+export interface OrderTrackingDTO {
+  id: string;
+  status: OrderStatusDTO;
+  message: string | null;
+  trackingNumber: string | null;
+  carrier: string | null;
+  timestamp: string;
+}
+
+export interface OrderSummaryDTO {
+  id: string;
+  status: OrderStatusDTO;
+  paymentMethod: PaymentMethodDTO;
+  paymentStatus: PaymentStatusDTO;
+  totalAmount: string;
+  itemCount: number;
+  sellerName: string;
+  buyerName: string | null;
+  createdAt: string;
+  primaryImage: string | null;
+}
+
+export interface OrderDetailDTO extends OrderSummaryDTO {
+  platformFee: string;
+  sellerAmount: string;
+  items: OrderItemDTO[];
+  tracking: OrderTrackingDTO[];
+  address: AddressDTO;
+  trackingNumber: string | null;
+  carrier: string | null;
+}
+
+/** Returned by POST /api/orders. For RAZORPAY, `razorpay` carries the checkout payload. */
+export interface CreateOrderResult {
+  orderIds: string[];
+  razorpay?: {
+    razorpayOrderId: string;
+    amount: number; // paise
+    currency: string;
+    keyId: string;
+  };
+}
+
+/** Body for POST /api/payments/verify (client-side confirmation). */
+export interface VerifyPaymentInput {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}
+
 /** Storage buckets accepted by POST /api/upload/sign. */
 export type UploadBucket = "products" | "kyc" | "reviews";
 

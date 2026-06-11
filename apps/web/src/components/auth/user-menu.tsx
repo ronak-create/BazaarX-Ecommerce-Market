@@ -42,6 +42,9 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-3 text-sm">
+      <Link href="/orders" className="text-slate-600 hover:underline">
+        Orders
+      </Link>
       <span className="hidden text-slate-600 sm:inline">
         {profile.name || profile.email || profile.phone}
       </span>
