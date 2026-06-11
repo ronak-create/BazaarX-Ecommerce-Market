@@ -39,6 +39,22 @@ export interface AuthProfile {
   isReseller: boolean;
 }
 
+/** An in-app notification shown in the header bell. */
+export interface NotificationDTO {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+/** GET /api/notifications response. */
+export interface NotificationsResponse {
+  items: NotificationDTO[];
+  unread: number;
+}
+
 /** Request body for POST /api/seller/register. */
 export interface SellerRegisterInput {
   businessName: string;

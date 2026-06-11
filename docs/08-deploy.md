@@ -4,7 +4,16 @@ How to take BazaarX (web) to production, plus the security posture and remaining
 
 ## Deploy the web app to Vercel
 
-1. **Import the repo** into Vercel. Set the **root directory** to `apps/web` (or keep the monorepo root and let Turborepo build — set the build command to `pnpm build --filter @bazaarx/web` and install command to `pnpm install`).
+1. **Import the repo** into Vercel. A root **`vercel.json`** is checked in and handles the monorepo build (keep the Vercel **root directory** at the repo root — do not set it to `apps/web`):
+   ```json
+   {
+     "framework": "nextjs",
+     "installCommand": "pnpm install --frozen-lockfile",
+     "buildCommand": "pnpm db:generate && pnpm --filter @bazaarx/web build",
+     "outputDirectory": "apps/web/.next"
+   }
+   ```
+   `db:generate` runs `prisma generate` so the client is built before `next build`; the workspace packages are consumed as source via `transpilePackages`, so they need no separate build step.
 2. **Environment variables** (Project → Settings → Environment Variables) — copy every key from `.env.example`. For database, **do not use the direct host in production**:
    - The direct host `db.<ref>.supabase.co:5432` is **IPv6-only** and works locally, but Vercel's serverless runtime is IPv4. Use the **region pooler** string from the Supabase dashboard → Connect → ORMs:
      - `DATABASE_URL` → transaction pooler: `postgresql://postgres.<ref>:<pw>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true`
@@ -14,6 +23,7 @@ How to take BazaarX (web) to production, plus the security posture and remaining
 4. **Supabase Auth → URL config**: add the production origin to allowed redirect URLs, and set `NEXT_PUBLIC_APP_URL` to the production URL.
 5. **Razorpay webhook**: in the Razorpay dashboard, add `https://<prod>/api/payments/webhook` with the `RAZORPAY_WEBHOOK_SECRET`. Subscribe to `payment.captured` / `order.paid`.
 6. **Providers**: enable Google and Phone (Twilio) in Supabase Auth if you want those login methods (email magic-link works out of the box).
+7. **Notifications**: in-app notifications (header bell) always work. To also send transactional **emails**, set `NOTIFY_EMAIL=true` plus `RESEND_API_KEY` and `RESEND_FROM_EMAIL` (a verified Resend sender). Left `false`, only in-app notifications are written.
 
 ## Scheduled jobs
 

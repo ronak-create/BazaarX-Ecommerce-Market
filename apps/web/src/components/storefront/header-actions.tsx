@@ -5,6 +5,7 @@ import { Heart, ShoppingCart } from "@phosphor-icons/react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { UserMenu } from "@/components/auth/user-menu";
+import { NotificationBell } from "@/components/storefront/notification-bell";
 
 function Badge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -44,6 +45,7 @@ export function HeaderActions() {
 
   return (
     <div className="flex items-center gap-1 sm:gap-1.5">
+      <NotificationBell />
       <IconLink href="/wishlist" label="Wishlist">
         <Heart size={22} />
         <Badge count={wishlist.data?.length ?? 0} />
