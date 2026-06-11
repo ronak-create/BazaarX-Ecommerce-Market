@@ -15,6 +15,7 @@
     "setup-storage": "dotenv -e ../../.env -- tsx scripts/setup-storage.ts",
     "make-admin": "dotenv -e ../../.env -- tsx scripts/make-admin.ts",
     "mature-commissions": "dotenv -e ../../.env -- tsx scripts/mature-commissions.ts",
+    "apply-rls": "dotenv -e ../../.env -- tsx scripts/apply-rls.ts",
     "studio": "dotenv -e ../../.env -- prisma studio",
     "typecheck": "tsc --noEmit"
   },

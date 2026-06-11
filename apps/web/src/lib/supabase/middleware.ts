@@ -7,8 +7,9 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
  * Refreshes the Supabase session cookie on every request and returns the
  * authenticated user (if any) alongside the response carrying updated cookies.
  */
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
+  const baseInit = requestHeaders ? { request: { headers: requestHeaders } } : { request };
+  let response = NextResponse.next(baseInit);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,7 +23,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({ request });
+          response = NextResponse.next(baseInit);
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );

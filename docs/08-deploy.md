@@ -26,13 +26,14 @@ How to take BazaarX (web) to production, plus the security posture and remaining
 - **Payments**: Razorpay order/webhook signatures verified with HMAC + timing-safe compare; the webhook is the source of truth.
 - **Storage**: `kyc` bucket is private — admins view docs via short-lived signed URLs; product-image upload signing requires an approved seller.
 - **Headers**: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS; `poweredByHeader` disabled.
+- **CSP**: per-request `Content-Security-Policy` set in `middleware.ts` (`lib/csp.ts`) — nonce + `strict-dynamic` for scripts, allowlisted Razorpay/Supabase origins for `connect-src`/`frame-src`/`img-src`. Razorpay's runtime-injected `checkout.js` is trusted via `strict-dynamic`. Dev relaxes with `unsafe-eval`/`ws:` for HMR.
+- **Rate limiting**: `middleware.ts` caps mutating `/api/*` traffic per IP (60/min general, 10/min on `/api/auth/*`) via `lib/rate-limit.ts`, returning `429` + `Retry-After`. **In-memory/process-local** — on multi-instance serverless, swap the store for Redis/Upstash (same keying).
+- **RLS**: `pnpm db:apply-rls` (`prisma/rls.sql`) enables row level security on all 24 app tables, locking the public PostgREST surface for `anon`/`authenticated`. Prisma connects as the owner role and bypasses RLS, so app behaviour is unchanged. Storage: product/review images are public-read; `kyc` stays private.
 - **Health**: `GET /api/health` checks DB connectivity for uptime monitors.
 
 ## Pre-launch checklist (still to do)
 
-- [ ] Add a tested **Content-Security-Policy** (must allow Razorpay `checkout.razorpay.com` and Supabase origins).
-- [ ] **Rate limiting** on abuse-prone endpoints (auth, coupon validation, reseller link clicks) — use Vercel/Upstash rate limiting (in-memory won't work on serverless).
-- [ ] Consider **Supabase RLS** policies as defense-in-depth (the app already gates via API, but RLS protects against direct PostgREST access if exposed).
+- [ ] Swap the in-memory rate limiter for a shared store (Upstash/Redis) once running >1 serverless instance.
 - [ ] Rotate any secrets that were shared during development.
 - [ ] Set up error monitoring (e.g. Sentry) and structured logging.
 - [ ] Load-test checkout and the order lifecycle.

@@ -99,6 +99,7 @@ Refresh the page — you'll see an **Admin** link in the header → opens the ad
 ```bash
 pnpm db:make-admin <email>        # promote a signed-in account to ADMIN
 pnpm db:mature-commissions        # move delivered+past-window reseller commissions to PAID (run on a schedule)
+pnpm db:apply-rls                 # enable row level security on all tables (run once before launch)
 pnpm db:seed                      # re-run the idempotent seed
 pnpm db:studio                    # visual DB browser
 ```

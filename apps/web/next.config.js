@@ -3,8 +3,8 @@
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
-// Security headers applied to every response. CSP is intentionally omitted to
-// avoid breaking Razorpay Checkout and Supabase; add a tested CSP before launch.
+// Static security headers applied to every response. The Content-Security-Policy
+// is set per-request in middleware.ts (it needs a fresh nonce each time).
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },

@@ -17,6 +17,7 @@
     "db:setup-storage": "pnpm --filter @bazaarx/db setup-storage",
     "db:make-admin": "pnpm --filter @bazaarx/db make-admin",
     "db:mature-commissions": "pnpm --filter @bazaarx/db mature-commissions",
+    "db:apply-rls": "pnpm --filter @bazaarx/db apply-rls",
     "db:studio": "pnpm --filter @bazaarx/db studio"
   },
   "devDependencies": {
