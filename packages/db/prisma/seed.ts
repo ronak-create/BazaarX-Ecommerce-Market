@@ -38,7 +38,7 @@ async function main() {
   if (banners.length === 0) {
     await prisma.banner.create({
       data: {
-        imageUrl: "https://placehold.co/1200x400?text=BazaarX",
+        imageUrl: "/banner-image.png",
         linkUrl: "/search",
         position: BannerPosition.HOME,
         priority: 1,
