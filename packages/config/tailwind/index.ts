@@ -51,7 +51,7 @@ const preset: Omit<Config, "content"> = {
       boxShadow: {
         // Tinted, soft shadows — no pure-black drop shadows.
         card: "0 1px 2px rgba(28,25,23,0.04), 0 8px 24px -12px rgba(28,25,23,0.12)",
-        "card-hover": "0 2px 4px rgba(28,25,23,0.06), 0 18px 40px -16px rgba(91,33,182,0.22)",
+        "card-hover": "0 2px 4px rgba(28,25,23,0.06), 0 16px 36px -16px rgba(28,25,23,0.18)",
         pop: "0 8px 30px -8px rgba(28,25,23,0.18)",
       },
       container: {

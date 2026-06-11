@@ -3,7 +3,6 @@ import { ShoppingBag } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { SearchBar } from "@/components/storefront/search-bar";
 import { HeaderActions } from "@/components/storefront/header-actions";
-import { RevealOnScroll } from "@/components/storefront/reveal-on-scroll";
 
 export const dynamic = "force-dynamic";
 
@@ -88,8 +87,6 @@ export default async function StorefrontLayout({
           © {new Date().getFullYear()} BazaarX. Built for buyers and sellers.
         </div>
       </footer>
-
-      <RevealOnScroll />
     </div>
   );
 }

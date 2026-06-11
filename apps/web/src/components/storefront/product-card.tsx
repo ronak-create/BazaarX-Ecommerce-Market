@@ -3,8 +3,17 @@ import { Star, Image } from "@phosphor-icons/react/dist/ssr";
 import { formatINR } from "@bazaarx/utils";
 import type { ProductCard as ProductCardData } from "@bazaarx/types";
 
-/** Compact product tile used on the homepage, listings, and wishlist. */
-export function ProductCard({ product }: { product: ProductCardData }) {
+/**
+ * Compact product tile used on the homepage, listings, and wishlist.
+ * Pass `priority` for above-the-fold tiles so they aren't lazy-loaded (LCP).
+ */
+export function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: ProductCardData;
+  priority?: boolean;
+}) {
   const price = product.discountedPrice ?? product.basePrice;
   const hasDiscount = product.discountedPrice != null;
   const off = hasDiscount
@@ -14,7 +23,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-card-hover"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-card-hover"
     >
       <div className="relative aspect-square overflow-hidden bg-ink-100">
         {product.primaryImage ? (
@@ -22,7 +31,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           <img
             src={product.primaryImage}
             alt={product.name}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (

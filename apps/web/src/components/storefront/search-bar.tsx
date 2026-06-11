@@ -26,7 +26,7 @@ export function SearchBar() {
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search for products, brands and more"
         aria-label="Search products"
-        className="w-full rounded-full border border-ink-200 bg-white py-2.5 pl-11 pr-4 text-sm text-ink-900 placeholder:text-ink-400 shadow-sm outline-none transition-all focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
+        className="w-full rounded-full border border-ink-200 bg-white py-2.5 pl-11 pr-4 text-sm text-ink-900 placeholder:text-ink-400 shadow-sm outline-none transition-colors focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
       />
     </form>
   );

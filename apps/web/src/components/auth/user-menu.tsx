@@ -63,7 +63,7 @@ export function UserMenu() {
     return (
       <Link
         href="/auth/login"
-        className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-fg shadow-pop transition-all hover:bg-brand-800 active:scale-[0.98]"
+        className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-fg shadow-pop transition hover:bg-brand-800 active:scale-[0.98]"
       >
         <User size={16} weight="bold" />
         <span className="hidden sm:inline">Sign in</span>
@@ -93,7 +93,7 @@ export function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className={`grid h-10 w-10 place-items-center overflow-hidden rounded-full border transition-all active:scale-95 ${
+        className={`grid h-10 w-10 place-items-center overflow-hidden rounded-full border transition active:scale-95 ${
           open ? "border-brand-400 ring-2 ring-brand-100" : "border-ink-200 hover:border-ink-300"
         }`}
       >

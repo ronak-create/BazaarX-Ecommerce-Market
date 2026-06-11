@@ -52,7 +52,7 @@ export function ProductBuyBox({
                 key={v.id}
                 onClick={() => setVariantId(v.id)}
                 disabled={v.stock === 0}
-                className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
+                className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                   v.id === variantId
                     ? "border-brand-600 bg-brand-50 text-brand-700 ring-2 ring-brand-100"
                     : "border-ink-300 text-ink-700 hover:border-ink-400"
@@ -105,7 +105,7 @@ export function ProductBuyBox({
         <button
           disabled={!inStock || !variantId || add.isPending}
           onClick={() => add.mutate({ productId, variantId, quantity: qty })}
-          className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-fg shadow-pop transition-all hover:bg-brand-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-brand-fg shadow-pop transition hover:bg-brand-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ShoppingCart size={18} weight="bold" />
           {add.isPending ? "Adding…" : "Add to cart"}
@@ -114,7 +114,7 @@ export function ProductBuyBox({
         <button
           onClick={() => (saved ? removeWish.mutate(productId) : addWish.mutate(productId))}
           aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
-          className={`grid h-11 w-11 place-items-center rounded-full border transition-all active:scale-95 ${
+          className={`grid h-11 w-11 place-items-center rounded-full border transition active:scale-95 ${
             saved
               ? "border-accent bg-accent/10 text-accent"
               : "border-ink-300 text-ink-600 hover:border-accent hover:text-accent"

@@ -36,7 +36,7 @@ export function ProductGallery({ images, name }: { images: ProductImageDTO[]; na
               key={img.id}
               onClick={() => setActive(img.url)}
               aria-label="View image"
-              className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
+              className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
                 active === img.url
                   ? "border-brand-600 ring-2 ring-brand-100"
                   : "border-ink-200 hover:border-ink-300"

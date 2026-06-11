@@ -77,13 +77,10 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
           <ProductBuyBox productId={dto.id} variants={dto.variants} />
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex divide-x divide-ink-200 rounded-xl border border-ink-200 bg-white">
             {BADGES.map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-ink-200 bg-white px-2 py-3 text-center"
-              >
-                <Icon size={20} weight="bold" className="text-brand-700" />
+              <div key={label} className="flex flex-1 items-center justify-center gap-2 px-2 py-3">
+                <Icon size={18} weight="bold" className="text-brand-700" />
                 <span className="text-xs font-medium text-ink-600">{label}</span>
               </div>
             ))}
