@@ -1,9 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@bazaarx/ui";
 import { useApproveKyc, useRejectKyc } from "@/hooks/use-kyc";
 import type { KycListItem } from "@bazaarx/types";
+
+type SignedDoc = { name: string; url: string };
+
+function useSignedDocs(sellerId: string, hasDocs: boolean) {
+  const [docs, setDocs] = useState<SignedDoc[] | null>(null);
+  useEffect(() => {
+    if (!hasDocs) return;
+    fetch(`/api/admin/kyc/${sellerId}/documents`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { documents: [] }))
+      .then((d) => setDocs(d.documents))
+      .catch(() => setDocs([]));
+  }, [sellerId, hasDocs]);
+  return docs;
+}
 
 function Row({ label, value }: { label: string; value: string | null }) {
   return (
@@ -19,6 +33,7 @@ export function KycReviewPanel({ item }: { item: KycListItem }) {
   const reject = useRejectKyc();
   const [showReject, setShowReject] = useState(false);
   const [reason, setReason] = useState("");
+  const docs = useSignedDocs(item.id, item.documents.length > 0);
 
   const busy = approve.isPending || reject.isPending;
 
@@ -45,14 +60,22 @@ export function KycReviewPanel({ item }: { item: KycListItem }) {
         <div className="text-sm text-slate-500">Documents</div>
         {item.documents.length === 0 ? (
           <p className="text-sm text-slate-400">No documents uploaded.</p>
+        ) : docs === null ? (
+          <p className="text-sm text-slate-400">Loading documents…</p>
         ) : (
-          <ul className="mt-1 space-y-1 text-sm">
-            {item.documents.map((d) => (
-              <li key={d} className="truncate rounded border border-slate-200 px-2 py-1">
-                {d}
-              </li>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {docs.map((d) => (
+              <a
+                key={d.url}
+                href={d.url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded border border-slate-200 px-2 py-1 text-sm text-brand hover:bg-slate-50"
+              >
+                {d.name}
+              </a>
             ))}
-          </ul>
+          </div>
         )}
       </div>
 

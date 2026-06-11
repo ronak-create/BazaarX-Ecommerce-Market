@@ -16,8 +16,8 @@ export async function GET() {
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: authUser.id },
+  const user = await prisma.user.findFirst({
+    where: { id: authUser.id, deletedAt: null },
     include: { sellerProfile: true, resellerProfile: true },
   });
 

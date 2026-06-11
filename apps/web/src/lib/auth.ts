@@ -25,11 +25,12 @@ export async function getAuthUser(): Promise<SupabaseUser | null> {
 /**
  * Returns the merged Prisma User row for the current Supabase session, or null.
  * Matches on Supabase user id stored as the Prisma User.id (set during sync).
+ * Banned (soft-deleted) users resolve to null so they cannot act anywhere.
  */
 export async function getCurrentUser(): Promise<User | null> {
   const authUser = await getAuthUser();
   if (!authUser) return null;
-  return prisma.user.findUnique({ where: { id: authUser.id } });
+  return prisma.user.findFirst({ where: { id: authUser.id, deletedAt: null } });
 }
 
 /** Guard for server components/layouts: redirects to login if unauthenticated. */

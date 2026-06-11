@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { prisma, SellerStatus } from "@bazaarx/db";
 import { uniqueSlug } from "@bazaarx/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { apiError, unauthorized } from "@/lib/api";
+import { apiError, forbidden, unauthorized } from "@/lib/api";
 import type { UploadSignResult } from "@bazaarx/types";
 
 const bodySchema = z.object({
@@ -34,6 +35,14 @@ export async function POST(req: Request) {
     return apiError("VALIDATION", parsed.error.issues[0]?.message ?? "Invalid input", 422);
   }
   const { bucket, fileName } = parsed.data;
+
+  // Only approved sellers may upload product images.
+  if (bucket === "products") {
+    const seller = await prisma.sellerProfile.findUnique({ where: { userId: user.id } });
+    if (!seller || seller.status !== SellerStatus.APPROVED) {
+      return forbidden("Approved seller account required");
+    }
+  }
 
   const ext = fileName.includes(".") ? fileName.split(".").pop() : undefined;
   const path = `${user.id}/${uniqueSlug(fileName.replace(/\.[^.]+$/, ""))}${ext ? `.${ext}` : ""}`;
