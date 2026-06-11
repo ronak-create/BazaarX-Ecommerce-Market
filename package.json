@@ -1,0 +1,27 @@
+{
+  "name": "bazaarx",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "pnpm --filter @bazaarx/db migrate",
+    "db:push": "pnpm --filter @bazaarx/db push",
+    "db:seed": "pnpm --filter @bazaarx/db seed",
+    "db:studio": "pnpm --filter @bazaarx/db studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "prisma", "esbuild"]
+  }
+}

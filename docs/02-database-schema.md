@@ -1,0 +1,572 @@
+# 02 — Database Schema
+
+Complete Prisma schema for BazaarX. PostgreSQL dialect, 24 models, 11 enums. Foreign keys and frequently-queried fields are indexed; status fields use enums; soft delete (`deletedAt`) on `User`, `Product`, `Order`.
+
+## Design decisions
+
+- **One Order per seller.** A cart can hold items from multiple sellers; checkout **splits** it into one `Order` per seller. This keeps each order under a single seller's fulfilment, payout, and dispute scope. `OrderItem` therefore never crosses sellers.
+- **Money as `Decimal(10,2)`.** All currency fields use `@db.Decimal(10,2)` to avoid float rounding. Currency is INR (single-currency for v1).
+- **Category tree** is a self-relation with a `level` field; the 3-level cap is enforced in application logic (Prisma can't constrain depth).
+- **ProductVariant.attributes** is `Json` (e.g. `{"size":"XL","color":"Red"}`) so new variant axes need no migration. A human-readable `label` and a unique `sku` accompany it.
+- **Denormalised rating** (`avgRating`, `totalReviews`) on `Product` is recomputed on review create/update to keep listing queries cheap.
+- **Commission vs platform fee.** `Order.platformFee` / `Order.sellerAmount` capture the platform's cut. The reseller's margin is tracked separately in `Commission` so reseller payouts are independent of seller payouts.
+- **Soft delete** uses `deletedAt DateTime?`; all read queries filter `deletedAt: null`. Hard deletes are reserved for GDPR-style erasure.
+
+## schema.prisma
+
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ──────────────────────────── ENUMS ────────────────────────────
+
+enum UserRole {
+  BUYER
+  SELLER
+  RESELLER
+  ADMIN
+}
+
+enum SellerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  REMOVED
+}
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  RETURN_REQUESTED
+  RETURNED
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum CommissionStatus {
+  PENDING
+  PAID
+}
+
+enum BannerPosition {
+  HOME
+  CATEGORY
+}
+
+// ──────────────────────────── USERS & PROFILES ────────────────────────────
+
+model User {
+  id         String    @id @default(cuid())
+  email      String?   @unique
+  phone      String?   @unique
+  name       String?
+  avatar     String?
+  role       UserRole  @default(BUYER)
+  isVerified Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  sellerProfile   SellerProfile?
+  resellerProfile ResellerProfile?
+  addresses       Address[]
+  cart            Cart?
+  wishlist        Wishlist[]
+  orders          Order[]         @relation("BuyerOrders")
+  reviews         Review[]
+  notifications   Notification[]
+  couponUsages    CouponUsage[]
+  disputes        Dispute[]       @relation("DisputeRaisedBy")
+
+  @@index([role])
+  @@index([deletedAt])
+}
+
+model SellerProfile {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  businessName    String
+  gstin           String?
+  panNumber       String?
+  bankAccount     String?
+  ifsc            String?
+  status          SellerStatus @default(PENDING)
+  rejectionReason String?
+  documents       String[]     // Supabase Storage paths for KYC docs
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id])
+  products Product[]
+  orders   Order[]   @relation("SellerOrders")
+  payouts  Payout[]
+
+  @@index([status])
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  orders Order[]
+
+  @@index([userId])
+}
+
+// ──────────────────────────── CATALOG ────────────────────────────
+
+model Category {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  parentId String?
+  imageUrl String?
+  level    Int     @default(1) // 1..3, capped in app logic
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+  @@index([slug])
+}
+
+model Product {
+  id              String        @id @default(cuid())
+  sellerId        String
+  categoryId      String
+  name            String
+  slug            String        @unique
+  description     String
+  basePrice       Decimal       @db.Decimal(10, 2)
+  discountedPrice Decimal?      @db.Decimal(10, 2)
+  status          ProductStatus @default(DRAFT)
+  brand           String?
+  tags            String[]
+  avgRating       Float         @default(0)
+  totalReviews    Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  seller        SellerProfile    @relation(fields: [sellerId], references: [id])
+  category      Category         @relation(fields: [categoryId], references: [id])
+  variants      ProductVariant[]
+  images        ProductImage[]
+  cartItems     CartItem[]
+  wishlistItems Wishlist[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+  resellerLinks ResellerLink[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([slug])
+  @@index([deletedAt])
+  @@index([avgRating])
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  label      String  // e.g. "Red-XL"
+  attributes Json    // e.g. {"color":"Red","size":"XL"}
+  price      Decimal @db.Decimal(10, 2)
+  stock      Int     @default(0)
+  sku        String  @unique
+
+  product    Product     @relation(fields: [productId], references: [id])
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  altText   String?
+  position  Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+// ──────────────────────────── CART & WISHLIST ────────────────────────────
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id])
+  items CartItem[]
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  variantId String
+  quantity  Int    @default(1)
+
+  cart    Cart           @relation(fields: [cartId], references: [id])
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+  @@index([cartId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+// ──────────────────────────── ORDERS ────────────────────────────
+
+model Order {
+  id            String        @id @default(cuid())
+  buyerId       String
+  sellerId      String
+  addressId     String
+  status        OrderStatus   @default(PLACED)
+  paymentMethod PaymentMethod
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  platformFee   Decimal       @db.Decimal(10, 2)
+  sellerAmount  Decimal       @db.Decimal(10, 2)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+
+  buyer      User           @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller     SellerProfile  @relation("SellerOrders", fields: [sellerId], references: [id])
+  address    Address        @relation(fields: [addressId], references: [id])
+  items      OrderItem[]
+  tracking   OrderTracking[]
+  payment    Payment?
+  review     Review[]
+  commission Commission?
+  dispute    Dispute?
+  couponUsage CouponUsage?
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([addressId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  productId  String
+  variantId  String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  totalPrice Decimal @db.Decimal(10, 2)
+
+  order   Order          @relation(fields: [orderId], references: [id])
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model OrderTracking {
+  id             String      @id @default(cuid())
+  orderId        String
+  status         OrderStatus
+  message        String?
+  trackingNumber String?
+  carrier        String?
+  timestamp      DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+// ──────────────────────────── PAYMENTS ────────────────────────────
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String        @unique
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("INR")
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([status])
+  @@index([razorpayOrderId])
+}
+
+// ──────────────────────────── REVIEWS ────────────────────────────
+
+model Review {
+  id           String   @id @default(cuid())
+  buyerId      String
+  productId    String
+  orderId      String
+  rating       Int      // 1..5
+  title        String?
+  body         String?
+  images       String[]
+  helpfulCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  buyer   User    @relation(fields: [buyerId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id])
+
+  @@unique([buyerId, productId, orderId])
+  @@index([productId])
+  @@index([buyerId])
+  @@index([orderId])
+  @@index([rating])
+}
+
+// ──────────────────────────── COUPONS ────────────────────────────
+
+model Coupon {
+  id             String       @id @default(cuid())
+  code           String       @unique
+  discountType   DiscountType
+  discountValue  Decimal      @db.Decimal(10, 2)
+  minOrderAmount Decimal      @db.Decimal(10, 2) @default(0)
+  maxUses        Int?
+  usedCount      Int          @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+
+  usages CouponUsage[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model CouponUsage {
+  id       String   @id @default(cuid())
+  couponId String
+  userId   String
+  orderId  String   @unique
+  usedAt   DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  order  Order  @relation(fields: [orderId], references: [id])
+
+  @@index([couponId])
+  @@index([userId])
+}
+
+// ──────────────────────────── NOTIFICATIONS ────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // ORDER_PLACED, SHIPPED, DELIVERED, OTP, PAYOUT, ...
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([userId, isRead])
+}
+
+// ──────────────────────────── PAYOUTS ────────────────────────────
+
+model Payout {
+  id          String       @id @default(cuid())
+  sellerId    String
+  amount      Decimal      @db.Decimal(10, 2)
+  status      PayoutStatus @default(PENDING)
+  utr         String?      // bank reference once completed
+  processedAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  seller SellerProfile @relation(fields: [sellerId], references: [id])
+
+  @@index([sellerId])
+  @@index([status])
+}
+
+// ──────────────────────────── RESELLER ────────────────────────────
+
+model ResellerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  totalEarnings   Decimal  @db.Decimal(10, 2) @default(0)
+  pendingEarnings Decimal  @db.Decimal(10, 2) @default(0)
+  createdAt       DateTime @default(now())
+
+  user  User           @relation(fields: [userId], references: [id])
+  links ResellerLink[]
+}
+
+model ResellerLink {
+  id          String   @id @default(cuid())
+  resellerId  String
+  productId   String
+  margin      Decimal  @db.Decimal(10, 2)
+  slug        String   @unique
+  clicks      Int      @default(0)
+  conversions Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id])
+  product     Product         @relation(fields: [productId], references: [id])
+  commissions Commission[]
+
+  @@index([resellerId])
+  @@index([productId])
+  @@index([slug])
+}
+
+model Commission {
+  id             String           @id @default(cuid())
+  orderId        String           @unique
+  resellerId     String
+  resellerLinkId String
+  amount         Decimal          @db.Decimal(10, 2)
+  status         CommissionStatus @default(PENDING)
+  createdAt      DateTime         @default(now())
+
+  order        Order        @relation(fields: [orderId], references: [id])
+  resellerLink ResellerLink @relation(fields: [resellerLinkId], references: [id])
+
+  @@index([resellerId])
+  @@index([resellerLinkId])
+  @@index([status])
+}
+
+// ──────────────────────────── MARKETING & DISPUTES ────────────────────────────
+
+model Banner {
+  id        String         @id @default(cuid())
+  imageUrl  String
+  linkUrl   String?
+  position  BannerPosition @default(HOME)
+  isActive  Boolean        @default(true)
+  priority  Int            @default(0)
+  createdAt DateTime       @default(now())
+
+  @@index([position, isActive])
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  orderId     String        @unique
+  raisedById  String
+  reason      String
+  description String
+  evidence    String[]
+  status      DisputeStatus @default(OPEN)
+  adminNote   String?
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+
+  order    Order @relation(fields: [orderId], references: [id])
+  raisedBy User  @relation("DisputeRaisedBy", fields: [raisedById], references: [id])
+
+  @@index([status])
+  @@index([raisedById])
+}
+```
+
+## Model checklist (24)
+
+User, SellerProfile, Address, Category, Product, ProductVariant, ProductImage, Cart, CartItem, Wishlist, Order, OrderItem, OrderTracking, Payment, Review, Coupon, CouponUsage, Notification, Payout, ResellerProfile, ResellerLink, Commission, Banner, Dispute.

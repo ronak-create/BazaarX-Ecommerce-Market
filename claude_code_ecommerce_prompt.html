@@ -1,0 +1,424 @@
+
+<style>
+  h2.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); color: var(--color-text-primary); }
+  .root { padding: 1rem 0; }
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .header p { font-size: 14px; color: var(--color-text-secondary); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .tab { padding: 5px 14px; font-size: 13px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); transition: all 0.15s; }
+  .tab.active { border-color: var(--color-border-primary); color: var(--color-text-primary); font-weight: 500; background: var(--color-background-secondary); }
+  .section { display: none; }
+  .section.active { display: block; }
+  .prompt-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; font-size: 13px; line-height: 1.7; white-space: pre-wrap; color: var(--color-text-primary); font-family: var(--font-mono); max-height: 380px; overflow-y: auto; }
+  .copy-btn { margin-top: 10px; padding: 7px 18px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; background: var(--color-background-primary); color: var(--color-text-primary); display: inline-flex; align-items: center; gap: 6px; }
+  .copy-btn:hover { background: var(--color-background-secondary); }
+  .copy-btn.copied { color: var(--color-text-success); border-color: var(--color-border-success); }
+  .arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .arch-card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px; }
+  .arch-card .label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .arch-card .value { font-size: 13px; font-weight: 500; }
+  .arch-card .sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .phase-list { display: flex; flex-direction: column; gap: 10px; }
+  .phase { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 14px; background: var(--color-background-primary); }
+  .phase-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .phase-num { width: 24px; height: 24px; border-radius: 50%; background: var(--color-background-info); color: var(--color-text-info); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .phase-title { font-size: 14px; font-weight: 500; }
+  .phase-items { font-size: 13px; color: var(--color-text-secondary); line-height: 1.8; padding-left: 34px; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); margin-left: 8px; }
+  .badge-blue { background: var(--color-background-info); color: var(--color-text-info); }
+  .badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+</style>
+
+<div class="root">
+  <h2 class="sr-only">Claude Code plan-mode prompt generator for an e-commerce platform similar to Amazon and Meesho</h2>
+  <div class="header">
+    <h1><i class="ti ti-brand-shopee" aria-hidden="true" style="font-size:18px;vertical-align:-2px;margin-right:6px"></i>Claude Code — Plan Mode Prompt</h1>
+    <p>Copy each section and paste into Claude Code in plan mode</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('main')">Main Prompt</div>
+    <div class="tab" onclick="switchTab('schema')">DB Schema</div>
+    <div class="tab" onclick="switchTab('stack')">Tech Stack</div>
+    <div class="tab" onclick="switchTab('phases')">Build Phases</div>
+  </div>
+
+  <div id="tab-main" class="section active">
+    <div class="prompt-box" id="main-prompt">You are planning a production-grade multi-vendor e-commerce platform (like Amazon + Meesho) from scratch. Work in PLAN MODE only — do not generate code yet. Analyze requirements, design the architecture, and produce a detailed implementation plan.
+
+---
+
+PROJECT: BazaarX — Multi-Vendor E-Commerce Platform
+
+OVERVIEW:
+A web + mobile (React Native) platform where:
+- Sellers register, verify KYC, list products, manage inventory & orders
+- Buyers browse, purchase, track orders, write reviews, save wishlists
+- Resellers (Meesho model) can share products and earn a margin
+- Admins have full control: user management, commissions, disputes, analytics
+
+---
+
+USER ROLES:
+1. BUYER       — Browse, cart, checkout, track, review, wishlist
+2. SELLER      — Register business, list products, manage orders, view earnings
+3. RESELLER    — Share products via referral links, earn commission on sales
+4. ADMIN       — Platform oversight, dispute resolution, commissions, analytics
+
+---
+
+TECH STACK (use these exactly):
+- Monorepo: Turborepo
+- Web App: Next.js 14 (App Router, TypeScript, Tailwind CSS)
+- Mobile App: Expo (React Native, TypeScript)
+- Backend: Next.js API Routes (REST) — inside the web app
+- Database: PostgreSQL (via Supabase)
+- ORM: Prisma
+- Auth: Supabase Auth (email/phone OTP, Google OAuth)
+- File Storage: Supabase Storage (product images, KYC docs)
+- Payments: Razorpay (online) + COD (cash on delivery)
+- Real-time: Supabase Realtime (order status updates)
+- Search: PostgreSQL full-text search + pg_trgm extension
+- Email/SMS: Resend (email) + Twilio (SMS/OTP)
+- State (Web): Zustand + React Query (TanStack)
+- State (Mobile): Zustand + React Query
+- Deployment: Vercel (web), Expo EAS (mobile), Supabase (DB + Storage)
+
+---
+
+MONOREPO STRUCTURE:
+apps/
+  web/        → Next.js (buyer + seller + admin dashboards)
+  mobile/     → Expo React Native (buyer + seller app)
+packages/
+  db/         → Prisma schema + seed scripts
+  types/      → Shared TypeScript interfaces
+  utils/      → Shared helpers (currency, date, validation)
+  ui/         → Shared UI components (web only, shadcn/ui base)
+  config/     → ESLint, Tailwind, TypeScript configs
+
+---
+
+CORE FEATURES TO PLAN:
+
+[1] AUTH & ONBOARDING
+- Email/phone OTP signup for buyers and sellers
+- Google OAuth for buyers
+- Separate onboarding flows: buyer (quick) vs seller (KYC + bank details)
+- Seller verification states: PENDING → APPROVED → REJECTED
+- JWT sessions via Supabase Auth
+
+[2] PRODUCT MANAGEMENT (Seller)
+- Create/edit/delete products with multiple images (up to 8)
+- Product variants: size, color, weight (with separate stock/price per variant)
+- Category tree (up to 3 levels deep)
+- Product status: DRAFT → ACTIVE → PAUSED → REMOVED
+- Bulk CSV upload for products
+- Low stock alerts
+
+[3] BUYER EXPERIENCE
+- Homepage: banners, featured categories, trending products
+- Product listing with filters: category, price range, rating, brand, location
+- Product detail: images gallery, variant selector, reviews, seller info
+- Cart: persistent (DB-backed), quantity update, remove items
+- Wishlist: save products for later
+- Checkout: address selection, payment method, coupon code, order summary
+- Order placed → confirmation email/SMS
+
+[4] PAYMENTS (Razorpay + COD)
+- Razorpay: UPI, cards, net banking, wallets
+- COD: mark order as COD, collect on delivery
+- Payment webhook handling (verify signature)
+- Refund flow for cancellations and returns
+- Platform commission auto-deducted from seller payout
+- Seller payout schedule: weekly via Razorpay Route or manual bank transfer
+
+[5] ORDER MANAGEMENT
+- Order lifecycle: PLACED → CONFIRMED → SHIPPED → OUT_FOR_DELIVERY → DELIVERED → (CANCELLED / RETURNED)
+- Seller confirms and marks shipped with tracking number
+- Buyer can cancel before SHIPPED
+- Return request window: 7 days after DELIVERED
+- Real-time order status via Supabase Realtime
+- Push notifications (Expo) + email/SMS at each stage
+
+[6] RESELLER FEATURE (Meesho model)
+- Any user can become a reseller (no approval needed)
+- Reseller adds margin to product price and shares a unique link
+- When a buyer purchases via the link, reseller earns the margin
+- Reseller dashboard: earnings, pending payouts, shared products
+- Reseller payout via Razorpay or bank transfer
+
+[7] SELLER DASHBOARD
+- Overview: revenue, orders, top products, ratings
+- Product management (CRUD, bulk upload)
+- Orders: list, filter by status, mark shipped, update tracking
+- Inventory alerts
+- Reviews and ratings received
+- Earnings and payout history
+
+[8] ADMIN DASHBOARD (web only)
+- User management: buyers, sellers, resellers — suspend/ban/approve
+- Seller KYC review and approval
+- Product moderation: flag/remove inappropriate listings
+- Order disputes: view both sides, issue refund or reject
+- Commission settings: set platform fee % per category
+- Banners and promotions management
+- Analytics: GMV, DAU, top sellers, top products, revenue chart
+- Payout management
+
+[9] SEARCH & DISCOVERY
+- Full-text search with pg_trgm (fuzzy matching)
+- Autocomplete suggestions (debounced, cached)
+- Filters: category, price, rating, brand, delivery time, COD available
+- Sort: relevance, price low/high, newest, best rated
+- Search history per user
+
+[10] NOTIFICATIONS
+- In-app notification bell (real-time via Supabase)
+- Email: order confirmation, shipped, delivered, OTP, payout
+- Push notifications (Expo) for mobile
+
+---
+
+DATABASE: Design a Prisma schema covering these models:
+User, SellerProfile, Address, Category, Product, ProductVariant,
+ProductImage, Cart, CartItem, Wishlist, Order, OrderItem, OrderTracking,
+Payment, Review, Coupon, CouponUsage, Notification, Payout,
+ResellerProfile, ResellerLink, Commission, Banner, Dispute
+
+---
+
+API ROUTES: Plan all REST endpoints under /api/ for:
+- /auth/* (handled by Supabase, custom profile sync)
+- /products (CRUD, search, filter)
+- /categories
+- /cart (get, add, update, remove)
+- /wishlist
+- /orders (create, list, detail, update status)
+- /payments (create order, verify webhook, refund)
+- /reviews
+- /seller/* (dashboard, products, orders, payouts)
+- /admin/* (users, kyc, disputes, analytics, banners)
+- /reseller/* (links, earnings, payouts)
+- /notifications
+- /upload (signed URLs via Supabase Storage)
+
+---
+
+MOBILE APP SCREENS (Expo):
+Buyer: Splash → Onboarding → Auth → Home → Search → Product Detail → Cart → Checkout → Order Tracking → Profile → Notifications → Wishlist
+Seller: Auth → Seller Onboarding → Seller Home → Add Product → My Products → Orders → Earnings
+
+---
+
+PLAN OUTPUT REQUESTED:
+1. Full Prisma schema (all models with relations)
+2. Folder/file structure for all apps and packages
+3. All API route signatures with request/response shape
+4. Component tree for web and mobile
+5. Auth flow diagram (text-based)
+6. Order lifecycle state machine
+7. Payment flow (Razorpay + COD)
+8. Reseller commission calculation logic
+9. Phase-by-phase build roadmap (6 phases)
+10. Environment variables list (.env.example)
+
+Start with the Prisma schema and folder structure first.</div>
+    <button class="copy-btn" onclick="copySection('main-prompt', this)">
+      <i class="ti ti-copy" aria-hidden="true"></i> Copy prompt
+    </button>
+  </div>
+
+  <div id="tab-schema" class="section">
+    <div class="prompt-box" id="schema-prompt">Now generate the complete Prisma schema for BazaarX.
+
+Requirements:
+- Use PostgreSQL dialect
+- Include ALL models listed below with proper relations
+- Add @@index on all foreign keys and frequently queried fields
+- Use enums for status fields
+- Use @default(now()) and @updatedAt where appropriate
+- Include soft delete (deletedAt DateTime?) on User, Product, Order
+
+MODELS TO INCLUDE:
+
+enum UserRole { BUYER SELLER RESELLER ADMIN }
+enum SellerStatus { PENDING APPROVED REJECTED SUSPENDED }
+enum ProductStatus { DRAFT ACTIVE PAUSED REMOVED }
+enum OrderStatus { PLACED CONFIRMED SHIPPED OUT_FOR_DELIVERY DELIVERED CANCELLED RETURN_REQUESTED RETURNED }
+enum PaymentMethod { RAZORPAY COD }
+enum PaymentStatus { PENDING PAID FAILED REFUNDED }
+enum PayoutStatus { PENDING PROCESSING COMPLETED FAILED }
+enum DisputeStatus { OPEN UNDER_REVIEW RESOLVED CLOSED }
+
+- User (id, email, phone, name, avatar, role, isVerified, createdAt, deletedAt)
+- SellerProfile (id, userId, businessName, gstin, panNumber, bankAccount, ifsc, status, rejectionReason, documents[])
+- Address (id, userId, fullName, phone, line1, line2, city, state, pincode, isDefault)
+- Category (id, name, slug, parentId self-relation, imageUrl, level)
+- Product (id, sellerId, categoryId, name, slug, description, basePrice, discountedPrice, status, brand, tags[], avgRating, totalReviews, createdAt, deletedAt)
+- ProductVariant (id, productId, label e.g."Red-XL", attributes Json, price, stock, sku)
+- ProductImage (id, productId, url, altText, position, isPrimary)
+- Cart (id, userId, createdAt, updatedAt)
+- CartItem (id, cartId, productId, variantId, quantity)
+- Wishlist (id, userId, productId, createdAt)
+- Order (id, buyerId, sellerId, addressId, status, paymentMethod, totalAmount, platformFee, sellerAmount, notes, createdAt, deletedAt)
+- OrderItem (id, orderId, productId, variantId, quantity, unitPrice, totalPrice)
+- OrderTracking (id, orderId, status, message, trackingNumber, carrier, timestamp)
+- Payment (id, orderId, method, status, razorpayOrderId, razorpayPaymentId, razorpaySignature, amount, currency, paidAt)
+- Review (id, buyerId, productId, orderId, rating, title, body, images[], helpfulCount, createdAt)
+- Coupon (id, code, discountType PERCENTAGE|FIXED, discountValue, minOrderAmount, maxUses, usedCount, expiresAt, isActive)
+- CouponUsage (id, couponId, userId, orderId, usedAt)
+- Notification (id, userId, type, title, body, data Json, isRead, createdAt)
+- Payout (id, sellerId, amount, status, utr, processedAt, createdAt)
+- ResellerProfile (id, userId, totalEarnings, pendingEarnings, createdAt)
+- ResellerLink (id, resellerId, productId, margin, slug, clicks, conversions, createdAt)
+- Commission (id, orderId, resellerId, resellerLinkId, amount, status PENDING|PAID, createdAt)
+- Banner (id, imageUrl, linkUrl, position HOME|CATEGORY, isActive, priority, createdAt)
+- Dispute (id, orderId, raisedBy, reason, description, evidence[], status, adminNote, resolvedAt, createdAt)
+
+Output the complete schema.prisma file content.</div>
+    <button class="copy-btn" onclick="copySection('schema-prompt', this)">
+      <i class="ti ti-copy" aria-hidden="true"></i> Copy DB schema prompt
+    </button>
+  </div>
+
+  <div id="tab-stack" class="section">
+    <div style="margin-bottom: 14px;">
+      <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 10px;">Recommended stack for a solo developer building Amazon + Meesho</p>
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="label">Web Frontend</div>
+          <div class="value">Next.js 14</div>
+          <div class="sub">App Router · TypeScript · Tailwind</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Mobile App</div>
+          <div class="value">Expo (RN)</div>
+          <div class="sub">TypeScript · EAS Build</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Database</div>
+          <div class="value">PostgreSQL</div>
+          <div class="sub">Supabase · Prisma ORM</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Auth</div>
+          <div class="value">Supabase Auth</div>
+          <div class="sub">OTP · Google OAuth</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Storage</div>
+          <div class="value">Supabase Storage</div>
+          <div class="sub">Product images · KYC docs</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Payments</div>
+          <div class="value">Razorpay</div>
+          <div class="sub">UPI · Cards · COD</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Real-time</div>
+          <div class="value">Supabase RT</div>
+          <div class="sub">Order tracking · Notifications</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Monorepo</div>
+          <div class="value">Turborepo</div>
+          <div class="sub">Shared packages · Fast builds</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Deploy (Web)</div>
+          <div class="value">Vercel</div>
+          <div class="sub">Edge · CI/CD</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Email / SMS</div>
+          <div class="value">Resend + Twilio</div>
+          <div class="sub">Transactional · OTP</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">State Mgmt</div>
+          <div class="value">Zustand + RQ</div>
+          <div class="sub">Client · Server state</div>
+        </div>
+        <div class="arch-card">
+          <div class="label">Search</div>
+          <div class="value">pg_trgm</div>
+          <div class="sub">PostgreSQL fuzzy search</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-phases" class="section">
+    <div class="phase-list">
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">1</div>
+          <div class="phase-title">Foundation <span class="badge badge-blue">Week 1–2</span></div>
+        </div>
+        <div class="phase-items">Turborepo setup · Supabase project · Prisma schema · Auth (email OTP + Google) · Shared types package · CI/CD pipeline · Env config</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">2</div>
+          <div class="phase-title">Seller Onboarding + Products <span class="badge badge-blue">Week 3–4</span></div>
+        </div>
+        <div class="phase-items">Seller registration + KYC flow · Admin approval dashboard · Product CRUD + image upload · Category management · Product variants</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">3</div>
+          <div class="phase-title">Buyer Experience <span class="badge badge-blue">Week 5–6</span></div>
+        </div>
+        <div class="phase-items">Homepage + listings · Search & filters · Product detail · Cart · Wishlist · Checkout flow · Address management</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">4</div>
+          <div class="phase-title">Payments + Orders <span class="badge badge-blue">Week 7–8</span></div>
+        </div>
+        <div class="phase-items">Razorpay integration · COD support · Webhook handling · Order lifecycle · Real-time tracking · Email/SMS notifications · Seller payout</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">5</div>
+          <div class="phase-title">Reseller + Reviews + Mobile <span class="badge badge-blue">Week 9–11</span></div>
+        </div>
+        <div class="phase-items">Reseller link system · Commission calculation · Buyer reviews + ratings · Expo mobile app · Push notifications · Mobile checkout</div>
+      </div>
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">6</div>
+          <div class="phase-title">Admin + Polish + Launch <span class="badge badge-green">Week 12–14</span></div>
+        </div>
+        <div class="phase-items">Admin analytics dashboard · Dispute resolution · Coupons + banners · Performance optimization · Security audit · Production deployment</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const tabs = ['main','schema','stack','phases'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+function copySection(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> Copy prompt';
+    }, 2000);
+  });
+}
+</script>
