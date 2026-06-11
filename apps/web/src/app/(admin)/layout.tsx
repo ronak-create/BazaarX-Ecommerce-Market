@@ -5,6 +5,7 @@ import { UserRole } from "@bazaarx/db";
 const NAV = [
   { href: "/admin", label: "Analytics" },
   { href: "/admin/kyc", label: "Seller KYC" },
+  { href: "/admin/categories", label: "Categories" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/disputes", label: "Disputes" },
   { href: "/admin/banners", label: "Banners" },

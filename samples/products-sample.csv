@@ -1,0 +1,5 @@
+name,description,categorySlug,basePrice,discountedPrice,brand,sku,price,stock
+Wireless Earbuds,Bluetooth 5.3 earbuds with noise cancellation,electronics,2499.00,1999.00,SoundMax,EARBUD-001,1999.00,50
+Cotton T-Shirt,Soft round-neck cotton tee,fashion,599.00,,Threads,TSHIRT-RED-M,599.00,120
+Steel Water Bottle,1L insulated stainless steel bottle,home-kitchen,899.00,749.00,HydroKeep,BOTTLE-1L,749.00,80
+Vitamin C Serum,Brightening face serum 30ml,beauty,1299.00,,GlowLab,SERUM-VITC-30,1299.00,40

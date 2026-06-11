@@ -73,6 +73,112 @@ export interface KycRejectInput {
   rejectionReason: string;
 }
 
+// ──────────────────────────── Categories ────────────────────────────
+
+export interface CategoryNode {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  imageUrl: string | null;
+  level: number;
+  children: CategoryNode[];
+}
+
+export interface CategoryInput {
+  name: string;
+  parentId?: string | null;
+  imageUrl?: string | null;
+}
+
+// ──────────────────────────── Products ────────────────────────────
+
+export interface VariantInput {
+  id?: string; // present when editing an existing variant
+  label: string;
+  attributes: Record<string, string>;
+  price: string; // decimal as string
+  stock: number;
+  sku: string;
+}
+
+export interface ImageInput {
+  url: string;
+  altText?: string;
+  position: number;
+  isPrimary: boolean;
+}
+
+export type ProductStatusInput = "DRAFT" | "ACTIVE" | "PAUSED";
+
+export interface ProductInput {
+  categoryId: string;
+  name: string;
+  description: string;
+  basePrice: string;
+  discountedPrice?: string | null;
+  brand?: string | null;
+  tags?: string[];
+  status?: ProductStatusInput;
+  variants: VariantInput[];
+  images: ImageInput[];
+}
+
+export interface ProductVariantDTO {
+  id: string;
+  label: string;
+  attributes: Record<string, string>;
+  price: string;
+  stock: number;
+  sku: string;
+}
+
+export interface ProductImageDTO {
+  id: string;
+  url: string;
+  altText: string | null;
+  position: number;
+  isPrimary: boolean;
+}
+
+export interface ProductDTO {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: string;
+  discountedPrice: string | null;
+  brand: string | null;
+  tags: string[];
+  status: "DRAFT" | "ACTIVE" | "PAUSED" | "REMOVED";
+  avgRating: number;
+  totalReviews: number;
+  variants: ProductVariantDTO[];
+  images: ProductImageDTO[];
+  createdAt: string;
+}
+
+/** Compact row for the seller product table and public listings. */
+export interface ProductCard {
+  id: string;
+  name: string;
+  slug: string;
+  basePrice: string;
+  discountedPrice: string | null;
+  status: "DRAFT" | "ACTIVE" | "PAUSED" | "REMOVED";
+  primaryImage: string | null;
+  totalStock: number;
+  avgRating: number;
+}
+
+/** Result of POST /api/seller/products/bulk. */
+export interface BulkUploadResult {
+  created: number;
+  failed: number;
+  errors: { row: number; message: string }[];
+}
+
 /** Storage buckets accepted by POST /api/upload/sign. */
 export type UploadBucket = "products" | "kyc" | "reviews";
 

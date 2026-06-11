@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { prisma, type User, type UserRole } from "@bazaarx/db";
+import { prisma, SellerStatus, type SellerProfile, type User, type UserRole } from "@bazaarx/db";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -54,4 +54,39 @@ export async function authorizeApi(
   if (!user) return { ok: false, status: 401 };
   if (role && user.role !== role) return { ok: false, status: 403 };
   return { ok: true, user };
+}
+
+/**
+ * API-route guard requiring the caller to be an APPROVED seller. Returns their
+ * SellerProfile so handlers can scope by sellerId. 403 if not approved.
+ */
+export async function authorizeApprovedSeller(): Promise<
+  | { ok: true; user: User; seller: SellerProfile }
+  | { ok: false; status: 401 | 403 }
+> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, status: 401 };
+  const seller = await prisma.sellerProfile.findUnique({ where: { userId: user.id } });
+  if (!seller || seller.status !== SellerStatus.APPROVED) {
+    return { ok: false, status: 403 };
+  }
+  return { ok: true, user, seller };
+}
+
+/** Server-component helper: the caller's seller profile, or null. */
+export async function getSellerProfile(): Promise<SellerProfile | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  return prisma.sellerProfile.findUnique({ where: { userId: user.id } });
+}
+
+/**
+ * Server-component guard for seller product pages: requires an APPROVED seller,
+ * otherwise sends them to onboarding. Returns the profile.
+ */
+export async function requireApprovedSellerPage(): Promise<SellerProfile> {
+  await requireUser();
+  const seller = await getSellerProfile();
+  if (!seller || seller.status !== SellerStatus.APPROVED) redirect("/seller/onboarding");
+  return seller;
 }

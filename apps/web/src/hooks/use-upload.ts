@@ -28,3 +28,14 @@ export async function uploadFile(file: File, bucket: UploadBucket): Promise<stri
 
   return path;
 }
+
+/** Upload to a public bucket and return the stored path plus its public URL. */
+export async function uploadPublicImage(
+  file: File,
+  bucket: UploadBucket,
+): Promise<{ path: string; url: string }> {
+  const path = await uploadFile(file, bucket);
+  const supabase = createClient();
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return { path, url: data.publicUrl };
+}
