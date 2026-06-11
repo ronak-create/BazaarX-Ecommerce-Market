@@ -38,3 +38,20 @@ export async function requireRole(role: UserRole): Promise<User> {
   if (user.role !== role) redirect("/");
   return user;
 }
+
+/**
+ * API-route guard: returns the user if they hold `role`, otherwise an object
+ * describing the failure so the handler can return the right JSON status.
+ * (Route handlers must not call redirect().)
+ */
+export async function authorizeApi(
+  role?: UserRole,
+): Promise<
+  | { ok: true; user: User }
+  | { ok: false; status: 401 | 403 }
+> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, status: 401 };
+  if (role && user.role !== role) return { ok: false, status: 403 };
+  return { ok: true, user };
+}
