@@ -53,6 +53,7 @@ const rowSchema = z.object({
   sku: z.string().trim().min(1),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
   stock: z.string().regex(/^\d+$/),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).optional(),
 });
 
 const REQUIRED = ["name", "description", "categoryslug", "baseprice", "sku", "stock"];
@@ -107,6 +108,7 @@ export async function POST(req: Request) {
       sku: record.sku,
       price: record.price || undefined,
       stock: record.stock,
+      status: (record.status || "").toUpperCase() || undefined,
     });
     if (!parsed.success) {
       result.failed++;
@@ -138,7 +140,7 @@ export async function POST(req: Request) {
           basePrice: data.basePrice,
           discountedPrice: data.discountedPrice ?? null,
           brand: data.brand ?? null,
-          status: ProductStatus.DRAFT,
+          status: (data.status as ProductStatus | undefined) ?? ProductStatus.ACTIVE,
           variants: {
             create: {
               label: "Default",
