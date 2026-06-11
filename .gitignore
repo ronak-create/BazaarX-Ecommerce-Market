@@ -36,3 +36,8 @@ Thumbs.db
 # misc
 *.tsbuildinfo
 coverage/
+
+# agent skills (local tooling, not app code)
+.agents/
+.claude/
+skills-lock.json
