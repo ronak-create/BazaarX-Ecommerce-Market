@@ -66,11 +66,52 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       await tx.product.update({ where: { id: product.id }, data });
 
       if (input.variants) {
-        const { variants } = nestedCreate({ variants: input.variants });
-        await tx.productVariant.deleteMany({ where: { productId: product.id } });
-        await tx.productVariant.createMany({
-          data: variants.map((v) => ({ ...v, productId: product.id })),
+        // Upsert instead of delete+recreate: a variant referenced by a cart
+        // item or an order can't be hard-deleted (FK), so update in place,
+        // create new ones, and only remove the variants the seller dropped.
+        const existing = await tx.productVariant.findMany({
+          where: { productId: product.id },
+          select: { id: true },
         });
+        const existingIds = new Set(existing.map((v) => v.id));
+        const keptIds = new Set<string>();
+
+        for (const v of input.variants) {
+          const vData = {
+            label: v.label,
+            attributes: v.attributes as Prisma.InputJsonValue,
+            price: v.price,
+            stock: v.stock,
+            sku: v.sku,
+          };
+          if (v.id && existingIds.has(v.id)) {
+            await tx.productVariant.update({ where: { id: v.id }, data: vData });
+            keptIds.add(v.id);
+          } else {
+            await tx.productVariant.create({ data: { ...vData, productId: product.id } });
+          }
+        }
+
+        const removed = [...existingIds].filter((id) => !keptIds.has(id));
+        if (removed.length > 0) {
+          // Cart references are ephemeral — clear them so the variant can go.
+          await tx.cartItem.deleteMany({ where: { variantId: { in: removed } } });
+          // Variants with order history must stay (FK + audit); take them out
+          // of circulation instead of deleting.
+          const ordered = await tx.orderItem.findMany({
+            where: { variantId: { in: removed } },
+            select: { variantId: true },
+            distinct: ["variantId"],
+          });
+          const orderedIds = new Set(ordered.map((o) => o.variantId));
+          const deletable = removed.filter((id) => !orderedIds.has(id));
+          if (deletable.length > 0) {
+            await tx.productVariant.deleteMany({ where: { id: { in: deletable } } });
+          }
+          if (orderedIds.size > 0) {
+            await tx.productVariant.updateMany({ where: { id: { in: [...orderedIds] } }, data: { stock: 0 } });
+          }
+        }
       }
       if (input.images) {
         const { images } = nestedCreate({ images: input.images });
