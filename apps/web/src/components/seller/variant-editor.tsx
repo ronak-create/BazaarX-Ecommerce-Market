@@ -1,9 +1,12 @@
 "use client";
 
-import { Button } from "@bazaarx/ui";
+import { Plus, Trash } from "@phosphor-icons/react";
 import type { VariantInput } from "@bazaarx/types";
 
 const blank = (): VariantInput => ({ label: "", attributes: {}, price: "", stock: 0, sku: "" });
+
+const cellCls =
+  "rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 outline-none transition-colors focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
 
 /**
  * Edits the list of product variants. Each variant has a label, price, stock,
@@ -36,59 +39,45 @@ export function VariantEditor({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">Variants</label>
-        <Button type="button" variant="outline" className="h-8 px-3 text-xs" onClick={() => onChange([...value, blank()])}>
-          + Add variant
-        </Button>
-      </div>
-
       {value.map((v, i) => (
-        <div key={i} className="space-y-2 rounded-md border border-slate-200 p-3">
+        <div key={i} className="space-y-2 rounded-xl border border-ink-200 bg-ink-50/60 p-3">
           <div className="grid gap-2 sm:grid-cols-2">
-            <input
-              placeholder="Label (e.g. Red / XL)"
-              value={v.label}
-              onChange={(e) => update(i, { label: e.target.value })}
-              className="rounded border border-slate-300 px-2 py-1.5 text-sm"
-            />
-            <input
-              placeholder="SKU"
-              value={v.sku}
-              onChange={(e) => update(i, { sku: e.target.value })}
-              className="rounded border border-slate-300 px-2 py-1.5 text-sm"
-            />
-            <input
-              placeholder="Price (e.g. 499.00)"
-              value={v.price}
-              onChange={(e) => update(i, { price: e.target.value })}
-              className="rounded border border-slate-300 px-2 py-1.5 text-sm"
-            />
+            <input placeholder="Label (e.g. Red / XL)" value={v.label} onChange={(e) => update(i, { label: e.target.value })} className={cellCls} />
+            <input placeholder="SKU" value={v.sku} onChange={(e) => update(i, { sku: e.target.value })} className={cellCls} />
+            <input placeholder="Price (e.g. 499.00)" value={v.price} onChange={(e) => update(i, { price: e.target.value })} className={`${cellCls} tabular-nums`} />
             <input
               type="number"
               placeholder="Stock"
               value={v.stock}
               onChange={(e) => update(i, { stock: Number(e.target.value) })}
-              className="rounded border border-slate-300 px-2 py-1.5 text-sm"
+              className={`${cellCls} tabular-nums`}
             />
           </div>
           <input
             placeholder="Attributes: color:Red, size:XL"
             defaultValue={attrsToText(v.attributes)}
             onBlur={(e) => update(i, { attributes: textToAttrs(e.target.value) })}
-            className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+            className={`${cellCls} w-full`}
           />
           {value.length > 1 && (
             <button
               type="button"
               onClick={() => onChange(value.filter((_, idx) => idx !== i))}
-              className="text-xs text-red-500 hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-medium text-ink-400 transition-colors hover:text-accent"
             >
-              Remove variant
+              <Trash size={13} /> Remove variant
             </button>
           )}
         </div>
       ))}
+
+      <button
+        type="button"
+        onClick={() => onChange([...value, blank()])}
+        className="inline-flex items-center gap-1.5 rounded-full border border-ink-300 bg-white px-4 py-2 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-400 hover:bg-ink-50"
+      >
+        <Plus size={15} weight="bold" /> Add variant
+      </button>
     </div>
   );
 }

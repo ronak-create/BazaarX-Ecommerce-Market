@@ -28,8 +28,8 @@ export default async function SellerOnboardingPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold">Seller onboarding</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900">Seller onboarding</h1>
+        <p className="mt-1 text-sm text-ink-500">
           Provide your business and bank details to start selling on BazaarX.
         </p>
       </header>
@@ -38,8 +38,8 @@ export default async function SellerOnboardingPage() {
 
       {/* No application yet, or a rejected one that can be resubmitted. */}
       {(!dto || dto.status === "REJECTED") && (
-        <section className="rounded-lg border border-slate-200 p-6">
-          <h2 className="mb-4 text-lg font-medium">
+        <section className="rounded-2xl border border-ink-200 bg-white p-6">
+          <h2 className="mb-4 font-display text-lg font-semibold text-ink-900">
             {dto?.status === "REJECTED" ? "Resubmit application" : "Business details"}
           </h2>
           <KycForm

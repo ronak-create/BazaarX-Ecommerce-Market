@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@bazaarx/ui";
+import { WarningCircle } from "@phosphor-icons/react";
 import { useRegisterSeller } from "@/hooks/use-seller";
 import { DocumentUpload } from "./document-upload";
 import type { SellerRegisterInput } from "@bazaarx/types";
@@ -29,9 +29,9 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div className="space-y-1">
-      <label htmlFor={name} className="block text-sm font-medium">
-        {label} {required && <span className="text-red-500">*</span>}
+    <div className="space-y-1.5">
+      <label htmlFor={name} className="block text-sm font-medium text-ink-700">
+        {label} {required && <span className="text-accent">*</span>}
       </label>
       <input
         id={name}
@@ -39,7 +39,7 @@ function Field({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
+        className="w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 outline-none transition-colors focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
       />
     </div>
   );
@@ -86,12 +86,18 @@ export function KycForm({ defaults, submitLabel = "Submit for review" }: Props) 
       <DocumentUpload value={documents} onChange={setDocuments} />
 
       {register.isError && (
-        <p className="text-sm text-red-600">{(register.error as Error).message}</p>
+        <p className="inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+          <WarningCircle size={16} weight="fill" /> {(register.error as Error).message}
+        </p>
       )}
 
-      <Button type="submit" disabled={register.isPending || businessName.trim().length < 2}>
+      <button
+        type="submit"
+        disabled={register.isPending || businessName.trim().length < 2}
+        className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-fg shadow-pop transition hover:bg-brand-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+      >
         {register.isPending ? "Submitting…" : submitLabel}
-      </Button>
+      </button>
     </form>
   );
 }

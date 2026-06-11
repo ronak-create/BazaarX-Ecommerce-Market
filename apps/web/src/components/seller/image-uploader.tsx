@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Star, X, WarningCircle } from "@phosphor-icons/react";
 import { uploadPublicImage } from "@/hooks/use-upload";
 import type { ImageInput } from "@bazaarx/types";
 
 const MAX_IMAGES = 8;
+
+const fileCls =
+  "block w-full text-sm text-ink-500 file:mr-3 file:rounded-full file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100 disabled:opacity-50";
 
 /**
  * Uploads product images to the public `products` bucket and manages ordering
@@ -60,44 +64,55 @@ export function ImageUploader({
   }
 
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium">Images (up to {MAX_IMAGES})</label>
+    <div className="space-y-3">
       <input
         type="file"
         multiple
         accept="image/*"
         disabled={busy || value.length >= MAX_IMAGES}
         onChange={(e) => handleFiles(e.target.files)}
-        className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm"
+        className={fileCls}
       />
-      {busy && <p className="text-sm text-slate-500">Uploading…</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      <p className="text-xs text-ink-400">Up to {MAX_IMAGES} images. The starred image is the cover.</p>
+      {busy && <p className="text-sm text-ink-500">Uploading…</p>}
+      {error && (
+        <p className="inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+          <WarningCircle size={15} weight="fill" /> {error}
+        </p>
+      )}
 
       {value.length > 0 && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
           {value
             .slice()
             .sort((a, b) => a.position - b.position)
             .map((img) => (
-              <div key={img.url} className="relative rounded border border-slate-200 p-1">
+              <div
+                key={img.url}
+                className={`group relative overflow-hidden rounded-xl border-2 bg-white ${
+                  img.isPrimary ? "border-brand-500 ring-2 ring-brand-100" : "border-ink-200"
+                }`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt="" className="h-20 w-full rounded object-cover" />
-                <div className="mt-1 flex items-center justify-between text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setPrimary(img.url)}
-                    className={img.isPrimary ? "font-medium text-brand" : "text-slate-500"}
-                  >
-                    {img.isPrimary ? "Primary" : "Set primary"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => remove(img.url)}
-                    className="text-red-500"
-                  >
-                    ✕
-                  </button>
-                </div>
+                <img src={img.url} alt="" className="h-24 w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => remove(img.url)}
+                  aria-label="Remove image"
+                  className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-ink-900/70 text-white opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
+                >
+                  <X size={13} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrimary(img.url)}
+                  className={`flex w-full items-center justify-center gap-1 py-1.5 text-xs font-medium transition-colors ${
+                    img.isPrimary ? "bg-brand-50 text-brand-700" : "text-ink-500 hover:bg-ink-50"
+                  }`}
+                >
+                  <Star size={12} weight={img.isPrimary ? "fill" : "regular"} />
+                  {img.isPrimary ? "Cover" : "Set cover"}
+                </button>
               </div>
             ))}
         </div>

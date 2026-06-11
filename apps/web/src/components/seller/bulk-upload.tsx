@@ -2,14 +2,14 @@
 
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@bazaarx/ui";
+import { UploadSimple, CheckCircle, WarningCircle } from "@phosphor-icons/react";
 import type { BulkUploadResult } from "@bazaarx/types";
 
 /**
  * Bulk product import from a CSV. Reads the file client-side and posts its text
  * to the bulk API. Expected columns:
  *   name, description, categorySlug, basePrice, sku, stock
- *   (optional: discountedPrice, brand, price)
+ *   (optional: discountedPrice, brand, price, status)
  */
 export function BulkUpload() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,23 +50,33 @@ export function BulkUpload() {
         className="hidden"
         onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
       />
-      <Button variant="outline" disabled={busy} onClick={() => inputRef.current?.click()}>
-        {busy ? "Importing…" : "Bulk CSV"}
-      </Button>
+      <button
+        disabled={busy}
+        onClick={() => inputRef.current?.click()}
+        className="inline-flex items-center gap-2 rounded-full border border-ink-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink-800 transition-colors hover:border-ink-400 hover:bg-ink-50 disabled:opacity-50"
+      >
+        <UploadSimple size={16} weight="bold" /> {busy ? "Importing…" : "Bulk CSV"}
+      </button>
 
       {(result || error) && (
-        <div className="absolute right-0 z-10 mt-2 w-72 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-lg">
-          {error && <p className="text-red-600">{error}</p>}
+        <div className="absolute right-0 z-10 mt-2 w-72 rounded-2xl border border-ink-200 bg-white p-4 text-sm shadow-pop">
+          {error && (
+            <p className="inline-flex items-center gap-1.5 font-medium text-accent">
+              <WarningCircle size={15} weight="fill" /> {error}
+            </p>
+          )}
           {result && (
-            <div className="space-y-1">
-              <p className="font-medium text-green-700">{result.created} created</p>
-              {result.failed > 0 && <p className="text-red-600">{result.failed} failed</p>}
+            <div className="space-y-1.5">
+              <p className="inline-flex items-center gap-1.5 font-semibold text-emerald-600">
+                <CheckCircle size={15} weight="fill" /> {result.created} created
+              </p>
+              {result.failed > 0 && <p className="font-medium text-accent">{result.failed} failed</p>}
               {result.errors.slice(0, 5).map((e) => (
-                <p key={e.row} className="text-xs text-slate-500">
+                <p key={e.row} className="text-xs text-ink-500">
                   Row {e.row}: {e.message}
                 </p>
               ))}
-              <button onClick={() => setResult(null)} className="mt-1 text-xs text-slate-400 hover:underline">
+              <button onClick={() => setResult(null)} className="mt-1 text-xs font-medium text-ink-400 hover:text-ink-600">
                 Dismiss
               </button>
             </div>

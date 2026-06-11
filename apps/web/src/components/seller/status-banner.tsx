@@ -1,10 +1,13 @@
+import { ClockCounterClockwise, CheckCircle, XCircle, Prohibit } from "@phosphor-icons/react/dist/ssr";
 import type { SellerProfileDTO } from "@bazaarx/types";
 
-const STYLES: Record<SellerProfileDTO["status"], { box: string; label: string }> = {
-  PENDING: { box: "border-amber-200 bg-amber-50 text-amber-800", label: "Under review" },
-  APPROVED: { box: "border-green-200 bg-green-50 text-green-800", label: "Approved" },
-  REJECTED: { box: "border-red-200 bg-red-50 text-red-800", label: "Rejected" },
-  SUSPENDED: { box: "border-slate-300 bg-slate-50 text-slate-700", label: "Suspended" },
+type IconCmp = typeof CheckCircle;
+
+const STYLES: Record<SellerProfileDTO["status"], { box: string; chip: string; label: string; icon: IconCmp }> = {
+  PENDING: { box: "border-amber-200 bg-amber-50", chip: "text-amber-700", label: "Under review", icon: ClockCounterClockwise },
+  APPROVED: { box: "border-emerald-200 bg-emerald-50", chip: "text-emerald-700", label: "Approved", icon: CheckCircle },
+  REJECTED: { box: "border-accent/30 bg-accent/5", chip: "text-accent", label: "Rejected", icon: XCircle },
+  SUSPENDED: { box: "border-ink-300 bg-ink-100", chip: "text-ink-700", label: "Suspended", icon: Prohibit },
 };
 
 const MESSAGES: Record<SellerProfileDTO["status"], string> = {
@@ -16,14 +19,16 @@ const MESSAGES: Record<SellerProfileDTO["status"], string> = {
 
 export function StatusBanner({ profile }: { profile: SellerProfileDTO }) {
   const s = STYLES[profile.status];
+  const Icon = s.icon;
   return (
-    <div className={`rounded-lg border p-4 ${s.box}`}>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold uppercase tracking-wide">{s.label}</span>
+    <div className={`rounded-2xl border p-4 ${s.box}`}>
+      <div className={`flex items-center gap-2 ${s.chip}`}>
+        <Icon size={18} weight="fill" />
+        <span className="text-sm font-semibold">{s.label}</span>
       </div>
-      <p className="mt-1 text-sm">{MESSAGES[profile.status]}</p>
+      <p className="mt-1.5 text-sm text-ink-700">{MESSAGES[profile.status]}</p>
       {profile.status === "REJECTED" && profile.rejectionReason && (
-        <p className="mt-2 text-sm font-medium">Reason: {profile.rejectionReason}</p>
+        <p className="mt-2 text-sm font-medium text-ink-900">Reason: {profile.rejectionReason}</p>
       )}
     </div>
   );
