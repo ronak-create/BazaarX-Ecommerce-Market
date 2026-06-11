@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@bazaarx/ui";
+import { WarningCircle } from "@phosphor-icons/react";
 import { useCategories, flattenCategories } from "@/hooks/use-categories";
 import { useCreateProduct, useUpdateProduct } from "@/hooks/use-products";
 import { VariantEditor } from "./variant-editor";
@@ -10,6 +10,10 @@ import { ImageUploader } from "./image-uploader";
 import type { ImageInput, ProductDTO, ProductInput, VariantInput } from "@bazaarx/types";
 
 type Props = { initial?: ProductDTO };
+
+const inputCls =
+  "w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 outline-none transition-colors focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
+const labelCls = "block text-sm font-medium text-ink-700";
 
 export function ProductForm({ initial }: Props) {
   const router = useRouter();
@@ -71,90 +75,100 @@ export function ProductForm({ initial }: Props) {
     /^\d+(\.\d{1,2})?$/.test(basePrice.trim()) &&
     variants.every((v) => v.label && v.sku && /^\d+(\.\d{1,2})?$/.test(v.price));
 
+  const card = "rounded-2xl border border-ink-200 bg-white p-5 sm:p-6";
+
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Name</label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
-        />
+      <div className={`${card} space-y-5`}>
+        <h2 className="font-display text-base font-semibold text-ink-900">Details</h2>
+
+        <div className="space-y-1.5">
+          <label className={labelCls}>Name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="e.g. Cotton crew-neck t-shirt" />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelCls}>Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className={inputCls}
+            placeholder="What makes this product worth buying?"
+          />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="space-y-1.5">
+            <label className={labelCls}>Category</label>
+            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>
+              <option value="">Select…</option>
+              {options.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelCls}>Base price (₹)</label>
+            <input value={basePrice} onChange={(e) => setBasePrice(e.target.value)} placeholder="499.00" className={`${inputCls} tabular-nums`} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelCls}>Brand</label>
+            <input value={brand} onChange={(e) => setBrand(e.target.value)} className={inputCls} placeholder="Optional" />
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Description</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
-        />
+      <div className={card}>
+        <h2 className="mb-4 font-display text-base font-semibold text-ink-900">Images</h2>
+        <ImageUploader value={images} onChange={setImages} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Category</label>
+      <div className={card}>
+        <h2 className="mb-4 font-display text-base font-semibold text-ink-900">Variants</h2>
+        <VariantEditor value={variants} onChange={setVariants} />
+      </div>
+
+      <div className={`${card} flex flex-wrap items-end justify-between gap-4`}>
+        <div className="space-y-1.5">
+          <label className={labelCls}>Status</label>
           <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as ProductInput["status"])}
+            className={`${inputCls} w-auto`}
           >
-            <option value="">Select…</option>
-            {options.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
+            <option value="DRAFT">Draft</option>
+            <option value="ACTIVE">Active</option>
+            <option value="PAUSED">Paused</option>
           </select>
+          <p className="text-xs text-ink-400">Only Active products show in the store.</p>
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Base price</label>
-          <input
-            value={basePrice}
-            onChange={(e) => setBasePrice(e.target.value)}
-            placeholder="499.00"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Brand</label>
-          <input
-            value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          />
-        </div>
-      </div>
 
-      <ImageUploader value={images} onChange={setImages} />
-      <VariantEditor value={variants} onChange={setVariants} />
-
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Status</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as ProductInput["status"])}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-        >
-          <option value="DRAFT">Draft</option>
-          <option value="ACTIVE">Active</option>
-          <option value="PAUSED">Paused</option>
-        </select>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.push("/seller/products")}
+            className="rounded-full border border-ink-300 bg-white px-5 py-2.5 text-sm font-semibold text-ink-800 transition-colors hover:border-ink-400 hover:bg-ink-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!canSubmit || mutation.isPending}
+            className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-fg shadow-pop transition hover:bg-brand-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {mutation.isPending ? "Saving…" : initial ? "Save changes" : "Create product"}
+          </button>
+        </div>
       </div>
 
       {mutation.isError && (
-        <p className="text-sm text-red-600">{(mutation.error as Error).message}</p>
+        <p className="inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+          <WarningCircle size={16} weight="fill" /> {(mutation.error as Error).message}
+        </p>
       )}
-
-      <div className="flex gap-2">
-        <Button type="submit" disabled={!canSubmit || mutation.isPending}>
-          {mutation.isPending ? "Saving…" : initial ? "Save changes" : "Create product"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push("/seller/products")}>
-          Cancel
-        </Button>
-      </div>
     </form>
   );
 }

@@ -1,3 +1,6 @@
+import { Wallet, ClockCounterClockwise, ChartLineUp, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+
+type IconCmp = typeof Wallet;
 import { prisma, OrderStatus, PayoutStatus } from "@bazaarx/db";
 import { formatINR, formatDateTime, toMoney } from "@bazaarx/utils";
 import { requireApprovedSellerPage } from "@/lib/auth";
@@ -27,58 +30,74 @@ export default async function SellerEarningsPage() {
   const available = toMoney(Math.max(0, lifetime - paidOut));
   const pending = Number(transitAgg._sum.sellerAmount ?? 0);
 
-  const cards = [
-    { label: "Available to pay out", value: formatINR(available) },
-    { label: "Pending (in transit)", value: formatINR(pending) },
-    { label: "Lifetime earned", value: formatINR(lifetime) },
-    { label: "Paid out", value: formatINR(paidOut) },
+  const cards: { label: string; value: string; icon: IconCmp; tint: string; primary?: boolean }[] = [
+    { label: "Available to pay out", value: formatINR(available), icon: Wallet, tint: "bg-brand-50 text-brand-700", primary: true },
+    { label: "Pending (in transit)", value: formatINR(pending), icon: ClockCounterClockwise, tint: "bg-amber-50 text-amber-700" },
+    { label: "Lifetime earned", value: formatINR(lifetime), icon: ChartLineUp, tint: "bg-emerald-50 text-emerald-700" },
+    { label: "Paid out", value: formatINR(paidOut), icon: CheckCircle, tint: "bg-ink-100 text-ink-600" },
   ];
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold">Earnings</h1>
+      <header>
+        <h1 className="font-display text-2xl font-bold text-ink-900">Earnings</h1>
+        <p className="mt-1 text-sm text-ink-500">
+          Order totals minus the platform fee. Amounts move from pending to available once an order is delivered and the return window passes.
+        </p>
+      </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((c) => (
-          <div key={c.label} className="rounded-lg border border-slate-200 p-4">
-            <div className="text-xs uppercase tracking-wide text-slate-400">{c.label}</div>
-            <div className="mt-1 text-xl font-semibold">{c.value}</div>
-          </div>
-        ))}
+        {cards.map((c) => {
+          const Icon = c.icon;
+          return (
+            <div
+              key={c.label}
+              className={`rounded-2xl border p-5 shadow-card ${
+                c.primary ? "border-brand-200 bg-brand-50/40" : "border-ink-200 bg-white"
+              }`}
+            >
+              <span className={`grid h-10 w-10 place-items-center rounded-xl ${c.tint}`}>
+                <Icon size={20} weight="bold" />
+              </span>
+              <div className="mt-4 font-display text-2xl font-bold tabular-nums text-ink-900">{c.value}</div>
+              <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-ink-400">{c.label}</div>
+            </div>
+          );
+        })}
       </div>
 
-      <p className="text-sm text-slate-500">
-        Earnings are your order totals minus the platform fee. Amounts move from “pending” to
-        “available” once an order is delivered and the return window passes.
-      </p>
-
       <section>
-        <h2 className="mb-3 text-lg font-medium">Payout history</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold text-ink-900">Payout history</h2>
         {payouts.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-            No payouts yet.
+          <div className="rounded-2xl border border-dashed border-ink-300 bg-white p-10 text-center">
+            <Wallet size={28} className="mx-auto text-ink-300" />
+            <p className="mt-3 text-sm text-ink-500">No payouts yet.</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-left text-xs uppercase text-slate-400">
-                <th className="py-2">Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>UTR</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payouts.map((p) => (
-                <tr key={p.id} className="border-b border-slate-100">
-                  <td className="py-2 text-slate-500">{formatDateTime(p.createdAt)}</td>
-                  <td className="font-medium">{formatINR(p.amount.toString())}</td>
-                  <td>{p.status}</td>
-                  <td className="text-slate-500">{p.utr ?? "—"}</td>
+          <div className="overflow-hidden rounded-2xl border border-ink-200 bg-white">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-ink-200 text-left text-xs uppercase tracking-wide text-ink-400">
+                  <th className="px-4 py-3 font-medium">Date</th>
+                  <th className="px-4 py-3 font-medium">Amount</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">UTR</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {payouts.map((p) => (
+                  <tr key={p.id} className="border-b border-ink-100 last:border-b-0">
+                    <td className="px-4 py-3 text-ink-500">{formatDateTime(p.createdAt)}</td>
+                    <td className="px-4 py-3 font-semibold tabular-nums text-ink-900">{formatINR(p.amount.toString())}</td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-600">{p.status}</span>
+                    </td>
+                    <td className="px-4 py-3 text-ink-500">{p.utr ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

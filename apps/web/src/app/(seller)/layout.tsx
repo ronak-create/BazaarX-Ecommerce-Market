@@ -1,14 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Storefront } from "@phosphor-icons/react/dist/ssr";
 import { requireUser } from "@/lib/auth";
-
-const NAV = [
-  { href: "/seller/onboarding", label: "Onboarding" },
-  { href: "/seller", label: "Dashboard" },
-  { href: "/seller/products", label: "Products" },
-  { href: "/seller/orders", label: "Orders" },
-  { href: "/seller/earnings", label: "Earnings" },
-];
+import { SellerNav } from "@/components/seller/seller-nav";
 
 export default async function SellerLayout({
   children,
@@ -20,33 +13,31 @@ export default async function SellerLayout({
   await requireUser();
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r border-ink-200 bg-ink-50 p-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand text-brand-fg">
-            <Storefront size={18} weight="fill" />
-          </span>
-          <span className="font-display text-base font-semibold text-ink-900">Seller</span>
-        </Link>
-        <Link
-          href="/"
-          className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-ink-500 transition-colors hover:text-brand-700"
-        >
-          <ArrowLeft size={14} /> Back to store
-        </Link>
-        <nav className="mt-6 space-y-1">
-          {NAV.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="block rounded-md px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-200"
-            >
-              {n.label}
+    <div className="flex min-h-[100dvh] flex-col bg-ink-50 lg:flex-row">
+      <aside className="sticky top-0 z-30 border-b border-ink-200 bg-white/85 backdrop-blur-xl lg:h-[100dvh] lg:w-60 lg:shrink-0 lg:border-b-0 lg:border-r">
+        <div className="flex items-center justify-between gap-2 px-4 py-4 lg:flex-col lg:items-start lg:gap-4">
+            <Link href="/seller" className="flex items-center gap-2.5">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-fg shadow-pop">
+                <Storefront size={20} weight="fill" />
+              </span>
+              <span className="font-display text-base font-bold tracking-tight text-ink-900">
+                Seller<span className="text-brand-600"> Hub</span>
+              </span>
             </Link>
-          ))}
-        </nav>
-      </aside>
-      <main className="flex-1 p-8">{children}</main>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-500 transition-colors hover:text-brand-700"
+            >
+              <ArrowLeft size={14} /> Back to store
+            </Link>
+          </div>
+
+          <SellerNav />
+        </aside>
+
+      <main className="flex-1 px-5 py-7 sm:px-8 lg:px-10 lg:py-10">
+        <div className="mx-auto max-w-5xl">{children}</div>
+      </main>
     </div>
   );
 }
