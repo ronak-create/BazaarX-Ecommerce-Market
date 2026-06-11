@@ -17,11 +17,13 @@ export async function POST() {
     );
   }
 
-  const email = authUser.email ?? null;
-  const phone = authUser.phone ?? null;
+  // Supabase returns "" (not null) for the unused contact field; normalise to
+  // null so the unique constraints don't collide across email-only accounts.
+  const email = authUser.email?.trim() || null;
+  const phone = authUser.phone?.trim() || null;
   const meta = authUser.user_metadata ?? {};
-  const name = (meta.full_name as string) ?? (meta.name as string) ?? null;
-  const avatar = (meta.avatar_url as string) ?? null;
+  const name = ((meta.full_name as string) || (meta.name as string) || "").trim() || null;
+  const avatar = (meta.avatar_url as string)?.trim() || null;
 
   const user = await prisma.user.upsert({
     where: { id: authUser.id },
