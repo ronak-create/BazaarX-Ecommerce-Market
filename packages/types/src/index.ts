@@ -179,6 +179,53 @@ export interface BulkUploadResult {
   errors: { row: number; message: string }[];
 }
 
+// ──────────────────────────── Cart & Wishlist ────────────────────────────
+
+export interface CartItemDTO {
+  id: string;
+  productId: string;
+  productName: string;
+  productSlug: string;
+  variantId: string;
+  variantLabel: string;
+  unitPrice: string;
+  quantity: number;
+  lineTotal: string;
+  image: string | null;
+  stock: number;
+  sellerId: string;
+  sellerName: string;
+}
+
+export interface CartSellerGroup {
+  sellerId: string;
+  sellerName: string;
+  items: CartItemDTO[];
+  subtotal: string;
+}
+
+export interface CartDTO {
+  groups: CartSellerGroup[];
+  itemCount: number;
+  subtotal: string;
+}
+
+export interface AddCartItemInput {
+  productId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface WishlistItemDTO {
+  productId: string;
+  name: string;
+  slug: string;
+  basePrice: string;
+  discountedPrice: string | null;
+  image: string | null;
+  avgRating: number;
+}
+
 /** Storage buckets accepted by POST /api/upload/sign. */
 export type UploadBucket = "products" | "kyc" | "reviews";
 
