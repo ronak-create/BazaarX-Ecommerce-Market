@@ -24,6 +24,10 @@ export function CheckoutClient() {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<{ code: string; discount: string } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
@@ -51,10 +55,30 @@ export function CheckoutClient() {
     );
   }
 
+  async function applyCoupon() {
+    setCouponError(null);
+    const res = await fetch("/api/coupons/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: couponInput.trim(), subtotal: cart!.subtotal }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setCoupon(null);
+      setCouponError(json.error?.message ?? "Invalid coupon");
+      return;
+    }
+    setCoupon(json);
+  }
+
   async function placeOrder() {
     setError(null);
     try {
-      const result = await place.mutateAsync({ addressId, paymentMethod: method });
+      const result = await place.mutateAsync({
+        addressId,
+        paymentMethod: method,
+        couponCode: coupon?.code,
+      });
       if (method === "RAZORPAY" && result.razorpay) {
         const ok = await payWithRazorpay(result.razorpay, {
           name: profile?.name,
@@ -140,13 +164,40 @@ export function CheckoutClient() {
 
       <aside className="h-fit rounded-lg border border-slate-200 p-5">
         <h2 className="mb-3 text-lg font-medium">Order total</h2>
-        <div className="flex justify-between text-sm">
-          <span className="text-slate-500">Items</span>
-          <span>{cart.itemCount}</span>
+
+        <div className="mb-3 space-y-2">
+          <div className="flex gap-2">
+            <input
+              value={couponInput}
+              onChange={(e) => setCouponInput(e.target.value)}
+              placeholder="Coupon code"
+              className="flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm uppercase"
+            />
+            <Button variant="outline" className="h-9 px-3 text-xs" onClick={applyCoupon}>
+              Apply
+            </Button>
+          </div>
+          {couponError && <p className="text-xs text-red-600">{couponError}</p>}
+          {coupon && (
+            <p className="text-xs text-green-600">
+              {coupon.code} applied — {formatINR(coupon.discount)} off
+            </p>
+          )}
         </div>
+
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-500">Subtotal</span>
+          <span>{formatINR(cart.subtotal)}</span>
+        </div>
+        {coupon && (
+          <div className="flex justify-between text-sm text-green-600">
+            <span>Discount</span>
+            <span>− {formatINR(coupon.discount)}</span>
+          </div>
+        )}
         <div className="mt-1 flex justify-between font-semibold">
           <span>Total</span>
-          <span>{formatINR(cart.subtotal)}</span>
+          <span>{formatINR(Math.max(0, Number(cart.subtotal) - Number(coupon?.discount ?? 0)))}</span>
         </div>
         {cart.groups.length > 1 && (
           <p className="mt-2 text-xs text-slate-400">

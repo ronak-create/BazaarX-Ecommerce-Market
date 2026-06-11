@@ -7,6 +7,7 @@ import { formatINR } from "@bazaarx/utils";
 import { useOrder, useCancelOrder, useReturnOrder } from "@/hooks/use-orders";
 import { StatusBadge } from "@/components/orders/status-badge";
 import { TrackingTimeline } from "@/components/orders/tracking-timeline";
+import { RaiseDispute } from "@/components/orders/raise-dispute";
 
 const CANCELLABLE = ["PLACED", "CONFIRMED"];
 
@@ -117,6 +118,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
             {(cancel.isError || ret.isError) && (
               <p className="text-sm text-red-600">{((cancel.error || ret.error) as Error).message}</p>
             )}
+
+            <RaiseDispute orderId={order.id} status={order.status} />
           </div>
         </section>
       </div>

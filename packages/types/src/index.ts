@@ -91,6 +91,14 @@ export interface CategoryInput {
   imageUrl?: string | null;
 }
 
+export interface CategoryFeeDTO {
+  id: string;
+  name: string;
+  level: number;
+  commissionPercent: number | null;
+  effectivePercent: number;
+}
+
 // ──────────────────────────── Products ────────────────────────────
 
 export interface VariantInput {
@@ -263,6 +271,7 @@ export type PaymentStatusDTO = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
 export interface CreateOrderInput {
   addressId: string;
   paymentMethod: PaymentMethodDTO;
+  couponCode?: string;
 }
 
 export interface OrderItemDTO {
@@ -359,6 +368,78 @@ export interface CommissionDTO {
   amount: string;
   status: "PENDING" | "PAID";
   productName: string;
+  createdAt: string;
+}
+
+// ──────────────────────────── Coupons ────────────────────────────
+
+export interface CreateCouponInput {
+  code: string;
+  discountType: "PERCENTAGE" | "FIXED";
+  discountValue: string;
+  minOrderAmount?: string;
+  maxUses?: number | null;
+  expiresAt?: string | null;
+}
+
+export interface CouponDTO {
+  id: string;
+  code: string;
+  discountType: "PERCENTAGE" | "FIXED";
+  discountValue: string;
+  minOrderAmount: string;
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  isActive: boolean;
+}
+
+export interface ValidateCouponResult {
+  code: string;
+  discount: string;
+}
+
+// ──────────────────────────── Disputes ────────────────────────────
+
+export interface RaiseDisputeInput {
+  reason: string;
+  description: string;
+}
+
+export interface DisputeDTO {
+  id: string;
+  orderId: string;
+  reason: string;
+  description: string;
+  status: "OPEN" | "UNDER_REVIEW" | "RESOLVED" | "CLOSED";
+  adminNote: string | null;
+  raisedByName: string | null;
+  orderTotal: string;
+  createdAt: string;
+}
+
+// ──────────────────────────── Admin analytics ────────────────────────────
+
+export interface AnalyticsDTO {
+  gmv: string;
+  paidOrders: number;
+  totalOrders: number;
+  activeBuyers: number;
+  topSellers: { name: string; revenue: string }[];
+  topProducts: { name: string; units: number }[];
+  revenueSeries: { date: string; revenue: string }[];
+}
+
+// ──────────────────────────── Admin users ────────────────────────────
+
+export interface AdminUserDTO {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  role: "BUYER" | "SELLER" | "RESELLER" | "ADMIN";
+  isBanned: boolean;
+  sellerStatus: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | null;
   createdAt: string;
 }
 

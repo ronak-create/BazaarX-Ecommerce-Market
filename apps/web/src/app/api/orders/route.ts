@@ -16,11 +16,13 @@ import { razorpay } from "@/lib/razorpay";
 import { notify } from "@/lib/notify";
 import { toOrderSummary, orderInclude } from "@/lib/orders";
 import { DEFAULT_PLATFORM_FEE_PERCENT } from "@/lib/config";
+import { validateCoupon } from "@/lib/coupon";
 import type { CreateOrderResult, Paginated, OrderSummaryDTO } from "@bazaarx/types";
 
 const bodySchema = z.object({
   addressId: z.string().min(1),
   paymentMethod: z.enum(["RAZORPAY", "COD"]),
+  couponCode: z.string().trim().optional(),
 });
 
 /** GET /api/orders — the buyer's own orders. */
@@ -113,6 +115,29 @@ export async function POST(req: Request) {
   const marginFor = (productId: string, qty: number) =>
     attribution && attribution.productId === productId ? toMoney(attribution.margin * qty) : 0;
 
+  // Resolve per-category platform fee percentages (fallback to the default).
+  const categoryIds = [...new Set(items.map((i) => i.product.categoryId))];
+  const cats = await prisma.category.findMany({
+    where: { id: { in: categoryIds } },
+    select: { id: true, commissionPercent: true },
+  });
+  const percentByCategory = new Map(
+    cats.map((c) => [c.id, c.commissionPercent ?? DEFAULT_PLATFORM_FEE_PERCENT]),
+  );
+  const feePercentFor = (categoryId: string) =>
+    percentByCategory.get(categoryId) ?? DEFAULT_PLATFORM_FEE_PERCENT;
+
+  // Validate an optional coupon against the base subtotal (seller-funded discount).
+  const baseSubtotal = toMoney(items.reduce((s, i) => s + Number(i.variant.price) * i.quantity, 0));
+  let couponId: string | null = null;
+  let discountTotal = 0;
+  if (parsed.data.couponCode) {
+    const check = await validateCoupon(parsed.data.couponCode, user.id, baseSubtotal);
+    if (!check.ok) return apiError("COUPON_INVALID", check.message, 422);
+    couponId = check.coupon.id;
+    discountTotal = check.discount;
+  }
+
   // Group by seller.
   const groups = new Map<string, typeof items>();
   for (const i of items) {
@@ -125,7 +150,7 @@ export async function POST(req: Request) {
     items.reduce(
       (s, i) => s + Number(i.variant.price) * i.quantity + marginFor(i.productId, i.quantity),
       0,
-    ),
+    ) - discountTotal,
   );
 
   let rzpOrderId: string | undefined;
@@ -153,9 +178,20 @@ export async function POST(req: Request) {
         const marginTotal = toMoney(
           groupItems.reduce((s, i) => s + marginFor(i.productId, i.quantity), 0),
         );
-        const fee = feeOf(baseTotal, DEFAULT_PLATFORM_FEE_PERCENT);
-        const sellerAmount = toMoney(baseTotal - fee);
-        const total = toMoney(baseTotal + marginTotal);
+        const fee = toMoney(
+          groupItems.reduce(
+            (s, i) => s + feeOf(Number(i.variant.price) * i.quantity, feePercentFor(i.product.categoryId)),
+            0,
+          ),
+        );
+        // Distribute the coupon discount across orders by base share (seller-funded,
+        // never pushing seller amount below zero).
+        const orderDiscount =
+          discountTotal > 0
+            ? Math.min(toMoney((discountTotal * baseTotal) / baseSubtotal), toMoney(baseTotal - fee))
+            : 0;
+        const sellerAmount = toMoney(baseTotal - fee - orderDiscount);
+        const total = toMoney(baseTotal - orderDiscount + marginTotal);
 
         const order = await tx.order.create({
           data: {
@@ -222,6 +258,12 @@ export async function POST(req: Request) {
           });
         }
 
+        if (couponId && orderDiscount > 0) {
+          await tx.couponUsage.create({
+            data: { couponId, userId: user.id, orderId: order.id },
+          });
+        }
+
         const seller = groupItems[0]!.product.seller;
         await notify({
           tx,
@@ -231,6 +273,10 @@ export async function POST(req: Request) {
           body: `You have a new order.`,
           data: { orderId: order.id },
         });
+      }
+
+      if (couponId) {
+        await tx.coupon.update({ where: { id: couponId }, data: { usedCount: { increment: 1 } } });
       }
 
       await tx.cartItem.deleteMany({ where: { cartId: cart!.id } });

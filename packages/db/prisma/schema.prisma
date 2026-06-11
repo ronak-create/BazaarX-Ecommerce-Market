@@ -157,12 +157,13 @@ model Address {
 // ──────────────────────────── CATALOG ────────────────────────────
 
 model Category {
-  id       String  @id @default(cuid())
-  name     String
-  slug     String  @unique
-  parentId String?
-  imageUrl String?
-  level    Int     @default(1)
+  id               String  @id @default(cuid())
+  name             String
+  slug             String  @unique
+  parentId         String?
+  imageUrl         String?
+  level            Int     @default(1)
+  commissionPercent Float? // platform fee % for this category; null = platform default
 
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children Category[] @relation("CategoryTree")
