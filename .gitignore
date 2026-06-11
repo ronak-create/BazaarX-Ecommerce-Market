@@ -9,10 +9,14 @@ dist/
 build/
 .turbo/
 
-# env
+# env & secrets
 .env
 .env.local
 .env.*.local
+supabase-pass.txt
+*.pem
+*secret*.txt
+*password*.txt
 
 # prisma
 packages/db/prisma/migrations/dev.db*

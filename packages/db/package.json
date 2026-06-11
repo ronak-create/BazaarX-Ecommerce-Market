@@ -12,6 +12,7 @@
     "migrate": "prisma migrate dev",
     "push": "prisma db push",
     "seed": "tsx prisma/seed.ts",
+    "setup-storage": "tsx scripts/setup-storage.ts",
     "studio": "prisma studio",
     "typecheck": "tsc --noEmit"
   },
