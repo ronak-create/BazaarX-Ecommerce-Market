@@ -1,6 +1,16 @@
+import { UserMenu } from "@/components/auth/user-menu";
+
 export default function HomePage() {
   return (
-    <main className="container py-16">
+    <main>
+      <header className="border-b border-slate-200">
+        <div className="container flex items-center justify-between py-4">
+          <span className="text-lg font-semibold">BazaarX</span>
+          <UserMenu />
+        </div>
+      </header>
+
+      <div className="container py-16">
       <h1 className="text-3xl font-semibold tracking-tight">BazaarX</h1>
       <p className="mt-2 text-slate-600">
         Multi-vendor e-commerce platform — Phase 1 foundation is running.
@@ -27,6 +37,7 @@ export default function HomePage() {
         Next steps: see <code>docs/06-roadmap.md</code> — Phase 2 (Seller
         onboarding + products).
       </p>
+      </div>
     </main>
   );
 }
