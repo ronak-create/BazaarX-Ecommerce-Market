@@ -57,7 +57,7 @@ export default async function StorefrontLayout({
   });
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-ink-50">
+    <div className="flex min-h-[100dvh] flex-col overflow-x-clip bg-ink-50">
       <div className="sticky top-0 z-40">
       <Marquee />
       <header className="border-b border-ink-200/70 bg-ink-50/80 backdrop-blur-xl supports-[backdrop-filter]:bg-ink-50/60">

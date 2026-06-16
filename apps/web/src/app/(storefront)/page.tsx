@@ -45,8 +45,24 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16">
-      {/* Hero — editorial split: serif headline left, motion media right. */}
-      <section className="grid items-stretch gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+      {/* Hero — full-bleed: figure | editorial headline | motion media. */}
+      <section className="relative left-1/2 grid w-screen -translate-x-1/2 items-stretch gap-5 px-5 sm:px-8 lg:grid-cols-[0.55fr_1.05fr_0.95fr] lg:px-14">
+        {/* Cut-out shopper, grounded at the bottom — large screens only. */}
+        <div className="relative hidden lg:block">
+          {/* Soft contact shadow so he doesn't look like he's floating. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute bottom-1 left-1/2 h-5 w-1/2 -translate-x-1/2 rounded-[50%] bg-ink-900/25 blur-md"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/hero-figure.png"
+            alt="A shopper browsing the marketplace on their phone"
+            className="pointer-events-none absolute bottom-0 left-1/2 h-full w-auto max-w-none -translate-x-1/2 select-none object-contain object-bottom"
+            draggable={false}
+          />
+        </div>
+
         <div className="flex animate-fade-up flex-col justify-center overflow-hidden rounded-3xl border border-ink-200 bg-white p-8 sm:p-10 lg:p-14">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-ink-200 bg-ink-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-600">
             <Sparkle size={12} weight="fill" /> A marketplace, reimagined

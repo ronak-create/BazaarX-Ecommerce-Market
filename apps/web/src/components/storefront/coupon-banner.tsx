@@ -22,17 +22,19 @@ export function CouponBanner({ code = "FIRST30", percent = 30 }: { code?: string
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl p-[2px] shadow-pop">
-      {/* Travelling border light — two highlights revolve around the edge */}
-      <span
+    <div className="relative overflow-hidden rounded-3xl p-[3px] shadow-pop">
+      {/* RGB lights travelling around the border: a full-spectrum conic gradient
+          spins behind the card; only the 3px rim shows, so the colours appear to
+          run along the edge. */}
+      <div
         aria-hidden
-        className="animate-revolve pointer-events-none absolute left-1/2 top-1/2 h-[250%] w-[250%]"
+        className="animate-revolve pointer-events-none absolute left-1/2 top-1/2 h-[260%] w-[260%]"
         style={{
           backgroundImage:
-            "conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,0.95) 24deg, rgba(255,255,255,0) 68deg, rgba(255,255,255,0) 180deg, rgba(255,255,255,0.55) 204deg, rgba(255,255,255,0) 248deg, rgba(255,255,255,0) 360deg)",
+            "conic-gradient(from 0deg, #ff004c, #ff8a00, #ffe600, #19e36a, #00b3ff, #7b2ff7, #ff004c)",
         }}
       />
-      <section className="relative overflow-hidden rounded-[calc(1.5rem-2px)] bg-promo px-6 py-7 text-promo-fg sm:px-10 sm:py-8">
+      <section className="relative overflow-hidden rounded-[calc(1.5rem-3px)] bg-promo px-6 py-7 text-promo-fg sm:px-10 sm:py-8">
         {/* Decorative grain of large dots */}
         <Sparkle weight="fill" className="animate-float pointer-events-none absolute -right-4 -top-4 h-28 w-28 text-white/10" />
         <Sparkle weight="fill" className="pointer-events-none absolute bottom-2 right-24 h-12 w-12 text-white/10" />
