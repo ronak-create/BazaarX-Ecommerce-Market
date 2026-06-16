@@ -58,8 +58,9 @@ export default async function StorefrontLayout({
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-ink-50">
+      <div className="sticky top-0 z-40">
       <Marquee />
-      <header className="sticky top-0 z-40 border-b border-ink-200/70 bg-ink-50/80 backdrop-blur-xl supports-[backdrop-filter]:bg-ink-50/60">
+      <header className="border-b border-ink-200/70 bg-ink-50/80 backdrop-blur-xl supports-[backdrop-filter]:bg-ink-50/60">
         <div className="flex h-[68px] w-full items-center gap-4 px-5 sm:gap-6 sm:px-8 lg:px-14">
           <Link href="/" className="group flex shrink-0 items-center gap-2.5">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink-900 text-white shadow-pop transition-transform duration-500 ease-smooth group-hover:-rotate-6">
@@ -102,6 +103,7 @@ export default async function StorefrontLayout({
           </div>
         </nav>
       </header>
+      </div>
 
       <main className="container flex-1 py-8">{children}</main>
 

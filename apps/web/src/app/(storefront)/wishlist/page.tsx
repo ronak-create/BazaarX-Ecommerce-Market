@@ -28,10 +28,15 @@ export default function WishlistPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
           <div key={p.productId} className="overflow-hidden rounded-lg border border-slate-200">
-            <Link href={`/product/${p.slug}`} className="block aspect-square bg-slate-50">
+            <Link
+              href={`/product/${p.slug}`}
+              data-product-card
+              data-card-image={p.image ?? ""}
+              className="block aspect-square bg-white"
+            >
               {p.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
+                <img src={p.image} alt={p.name} className="h-full w-full object-contain p-3" />
               ) : (
                 <div className="flex h-full items-center justify-center text-xs text-slate-300">
                   No image

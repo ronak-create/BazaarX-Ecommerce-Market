@@ -19,6 +19,32 @@ type Phase = "idle" | "spin" | "hold" | "lift";
 
 const DEPTH = 16; // px of card thickness
 const PERSPECTIVE = 1400;
+const SEEN_KEY = "bx:flipped-products"; // products already given the flip once
+
+/** Has this product href already played the flip (so it's cached → load fast)? */
+function hasFlipped(href: string): boolean {
+  try {
+    const raw = localStorage.getItem(SEEN_KEY);
+    return raw ? (JSON.parse(raw) as string[]).includes(href) : false;
+  } catch {
+    return false;
+  }
+}
+
+/** Record that a product has been flipped; keep the list bounded. */
+function markFlipped(href: string) {
+  try {
+    const raw = localStorage.getItem(SEEN_KEY);
+    const list: string[] = raw ? JSON.parse(raw) : [];
+    if (!list.includes(href)) {
+      list.push(href);
+      while (list.length > 200) list.shift();
+      localStorage.setItem(SEEN_KEY, JSON.stringify(list));
+    }
+  } catch {
+    /* localStorage may be unavailable; just skip persistence */
+  }
+}
 
 export function CardTransition() {
   const router = useRouter();
@@ -48,8 +74,12 @@ export function CardTransition() {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return; // let native nav happen
       const href = a.getAttribute("href");
       if (!href) return;
+      // Only flip the first time a product is opened — afterwards it's cached
+      // and loads fast, so a normal (instant) navigation is better.
+      if (hasFlipped(href)) return;
 
       e.preventDefault();
+      markFlipped(href);
       rectRef.current = a.getBoundingClientRect();
       setImage(a.getAttribute("data-card-image") || "");
       readyRef.current = false;
@@ -100,17 +130,16 @@ export function CardTransition() {
     const dy = vh / 2 - cy;
     const cover = (Math.max(vw / rect.width, vh / rect.height) * 1.15).toFixed(3);
 
-    const easing = "cubic-bezier(0.65, 0, 0.35, 1)";
-    const baseScale = "1";
-
-    // Stage 1 — spin + approach (front image visible, growing toward viewer).
+    // One continuous spin: 1.5 turns (540°), flying toward the viewer and
+    // growing, ENDING on the black back face filling the screen. Single
+    // animation = no mid-sequence pause where the image sits then flips.
     const spin = el.animate(
       [
-        { transform: `translate3d(0,0,0) rotateY(0deg) scale(${baseScale})` },
-        { transform: `translate3d(${dx * 0.5}px, ${dy * 0.5}px, 120px) rotateY(360deg) scale(${(Number(cover) * 0.55).toFixed(3)})`, offset: 0.55 },
-        { transform: `translate3d(${dx}px, ${dy}px, 240px) rotateY(720deg) scale(${(Number(cover) * 0.8).toFixed(3)})` },
+        { transform: `translate3d(0px,0px,0px) rotateY(0deg) scale(1)` },
+        { transform: `translate3d(${(dx * 0.6).toFixed(1)}px, ${(dy * 0.6).toFixed(1)}px, 160px) rotateY(360deg) scale(${(Number(cover) * 0.5).toFixed(3)})`, offset: 0.6 },
+        { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0px) rotateY(540deg) scale(${cover})` },
       ],
-      { duration: 900, easing, fill: "forwards" },
+      { duration: 1150, easing: "cubic-bezier(0.45, 0, 0.25, 1)", fill: "forwards" },
     );
 
     // Start loading the destination in parallel with the spin.
@@ -123,21 +152,8 @@ export function CardTransition() {
     }
     if (cardRef.current !== el) return;
 
-    // Stage 2 — cover: finish on the black back face, scaled past the viewport.
-    const coverAnim = el.animate(
-      [
-        { transform: `translate3d(${dx}px, ${dy}px, 240px) rotateY(720deg) scale(${(Number(cover) * 0.8).toFixed(3)})` },
-        { transform: `translate3d(${dx}px, ${dy}px, 0px) rotateY(900deg) scale(${cover})` },
-      ],
-      { duration: 450, easing: "cubic-bezier(0.5, 0, 0.2, 1)", fill: "forwards" },
-    );
-    try {
-      await coverAnim.finished;
-    } catch {
-      return;
-    }
-
-    // Stage 3 — hold a plain black cover (seamless), then wait for readiness.
+    // Hold a plain black cover (seamless — the back face is already black and
+    // covering), then wait for the destination to signal ready.
     coverShownAt.current = performance.now();
     goPhase("hold");
     // Safety: never stay black forever.
@@ -216,11 +232,11 @@ export function CardTransition() {
               willChange: "transform",
             }}
           >
-            {/* Front — product image */}
-            <div style={{ ...faceBase, transform: `translateZ(${DEPTH / 2}px)`, background: "#0a0a0a" }}>
+            {/* Front — full product image on white (never cropped/stretched) */}
+            <div style={{ ...faceBase, transform: `translateZ(${DEPTH / 2}px)`, background: "#fff" }}>
               {image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} draggable={false} />
+                <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 12 }} draggable={false} />
               ) : null}
             </div>
             {/* Back — black */}

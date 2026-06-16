@@ -26,7 +26,7 @@ export function ProductGallery({ images, name }: { images: ProductImageDTO[]; na
         <img
           src={active}
           alt={name}
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className="h-full w-full object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
       {ordered.length > 1 && (
@@ -43,7 +43,7 @@ export function ProductGallery({ images, name }: { images: ProductImageDTO[]; na
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img.url} alt="" className="h-full w-full object-cover" />
+              <img src={img.url} alt="" className="h-full w-full bg-white object-contain p-1" />
             </button>
           ))}
         </div>

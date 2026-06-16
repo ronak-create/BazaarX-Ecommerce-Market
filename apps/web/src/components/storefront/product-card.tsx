@@ -27,15 +27,17 @@ export function ProductCard({
       data-card-image={product.primaryImage ?? ""}
       className="group flex flex-col overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-card transition duration-300 ease-smooth hover:-translate-y-1.5 hover:border-ink-900 hover:shadow-card-hover"
     >
-      <div className="relative aspect-square overflow-hidden bg-ink-100">
+      <div className="relative aspect-square overflow-hidden bg-white">
         {product.primaryImage ? (
+          // object-contain on white: the whole product is always visible, never
+          // cropped or stretched (cropping/distortion reads as untrustworthy).
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.primaryImage}
             alt={product.name}
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
-            className="h-full w-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-110"
+            className="h-full w-full object-contain p-4 transition-transform duration-700 ease-smooth group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-1.5 text-ink-300">
