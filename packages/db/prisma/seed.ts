@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, BannerPosition } from "@prisma/client";
+import { PrismaClient, UserRole, BannerPosition, DiscountType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -34,6 +34,25 @@ async function main() {
     });
   }
 
+  // Public first-order coupon: 30% off, one redemption per account (enforced in
+  // validateCoupon), so it acts as a welcome / first-purchase discount.
+  await prisma.coupon.upsert({
+    where: { code: "FIRST30" },
+    update: {
+      discountType: DiscountType.PERCENTAGE,
+      discountValue: 30,
+      minOrderAmount: 0,
+      isActive: true,
+    },
+    create: {
+      code: "FIRST30",
+      discountType: DiscountType.PERCENTAGE,
+      discountValue: 30,
+      minOrderAmount: 0,
+      isActive: true,
+    },
+  });
+
   const banners = await prisma.banner.findMany({ where: { position: BannerPosition.HOME } });
   if (banners.length === 0) {
     await prisma.banner.create({
@@ -46,7 +65,7 @@ async function main() {
     });
   }
 
-  console.log(`Seeded admin ${admin.email}, ${categories.length} categories, banners.`);
+  console.log(`Seeded admin ${admin.email}, ${categories.length} categories, FIRST30 coupon, banners.`);
 }
 
 main()

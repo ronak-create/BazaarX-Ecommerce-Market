@@ -14,6 +14,8 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma, BannerPosition, ProductStatus } from "@bazaarx/db";
 import { ProductCard } from "@/components/storefront/product-card";
+import { HeroSlider, type HeroSlide } from "@/components/storefront/hero-slider";
+import { CouponBanner } from "@/components/storefront/coupon-banner";
 import { toProductCard } from "@/lib/product-card";
 
 export const dynamic = "force-dynamic";
@@ -40,30 +42,44 @@ export default async function HomePage() {
     }),
   ]);
 
-  const hero = banners[0];
+  // Hero slides come from HOME banners; if there are fewer than two, pad with
+  // recent product imagery so the auto-slider always has something to rotate.
+  const bannerSlides: HeroSlide[] = banners.map((b) => ({ src: b.imageUrl, href: b.linkUrl ?? "/search" }));
+  const productSlides: HeroSlide[] =
+    bannerSlides.length < 2
+      ? products
+          .map((p) => (p.images.find((i) => i.isPrimary) ?? p.images[0])?.url)
+          .filter((u): u is string => Boolean(u))
+          .slice(0, 4)
+          .map((src) => ({ src, href: "/search" }))
+      : [];
+  const heroSlides: HeroSlide[] = [...bannerSlides, ...productSlides].slice(0, 5);
 
   return (
-    <div className="space-y-14">
-      {/* Hero — asymmetric split, copy left, colourful collage right. */}
-      <section className="grid items-stretch gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="flex animate-fade-up flex-col justify-center overflow-hidden rounded-2xl border border-ink-200 bg-white p-8 sm:p-10 lg:p-12">
-          <h1 className="max-w-[14ch] font-display text-4xl font-bold leading-[1.05] text-ink-900 sm:text-5xl lg:text-6xl">
-            One marketplace,<br />thousands of sellers.
+    <div className="space-y-16">
+      {/* Hero — editorial split: serif headline left, motion media right. */}
+      <section className="grid items-stretch gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="flex animate-fade-up flex-col justify-center overflow-hidden rounded-3xl border border-ink-200 bg-white p-8 sm:p-10 lg:p-14">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-ink-200 bg-ink-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-600">
+            <Sparkle size={12} weight="fill" /> A marketplace, reimagined
+          </span>
+          <h1 className="mt-5 max-w-[15ch] font-display text-5xl font-semibold leading-[1.02] tracking-tight text-ink-900 sm:text-6xl lg:text-7xl">
+            One place. <span className="italic text-ink-400">Thousands</span> of sellers.
           </h1>
-          <p className="mt-4 max-w-[46ch] text-base leading-relaxed text-ink-600">
-            Discover great products at honest prices, with easy returns and cash on delivery across India.
+          <p className="mt-5 max-w-[46ch] text-base leading-relaxed text-ink-600">
+            Discover great products at honest prices — easy returns and cash on delivery, across India.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/search"
-              className="group inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-brand-fg shadow-pop transition hover:bg-brand-800 active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 rounded-full bg-ink-900 px-6 py-3.5 text-sm font-semibold text-white shadow-pop transition duration-300 ease-smooth hover:gap-3 hover:bg-ink-800 active:scale-[0.98]"
             >
               Start shopping
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={16} className="transition-transform duration-300 ease-smooth group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/seller"
-              className="inline-flex items-center gap-2 rounded-full border border-ink-300 bg-white px-6 py-3 text-sm font-semibold text-ink-800 transition-colors hover:border-ink-400 hover:bg-ink-50 active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full border border-ink-300 bg-white px-6 py-3.5 text-sm font-semibold text-ink-800 transition-colors hover:border-ink-900 hover:bg-ink-900 hover:text-white active:scale-[0.98]"
             >
               <Storefront size={16} />
               Sell on BazaarX
@@ -71,19 +87,8 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {hero ? (
-          <Link
-            href={hero.linkUrl ?? "/search"}
-            className="group relative block min-h-[260px] overflow-hidden rounded-2xl border border-ink-200 lg:min-h-0"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={hero.imageUrl}
-              alt=""
-              fetchPriority="high"
-              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          </Link>
+        {heroSlides.length > 0 ? (
+          <HeroSlider slides={heroSlides} />
         ) : (
           <Link
             href="/search"
@@ -121,6 +126,9 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* First-order coupon callout — the single chromatic accent. */}
+      <CouponBanner code="FIRST30" percent={30} />
+
       {/* Trust strip — monochrome utility row. */}
       <section className="grid grid-cols-2 divide-ink-200 rounded-2xl border border-ink-200 bg-white sm:grid-cols-4 sm:divide-x">
         {TRUST.map(({ icon: Icon, label }) => (
@@ -135,10 +143,13 @@ export default async function HomePage() {
 
       {/* Categories — each tile gets a rotating tint. */}
       <section>
-        <div className="mb-5 flex items-end justify-between">
-          <h2 className="font-display text-2xl font-semibold text-ink-900">Shop by category</h2>
-          <Link href="/search" className="text-sm font-medium text-brand-700 hover:underline">
-            Browse all
+        <div className="mb-6 flex items-end justify-between">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900">Shop by category</h2>
+          <Link
+            href="/search"
+            className="group inline-flex items-center gap-1 text-sm font-semibold text-ink-900 transition-all hover:gap-2"
+          >
+            Browse all <ArrowRight size={15} weight="bold" />
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -161,10 +172,13 @@ export default async function HomePage() {
 
       {/* New arrivals. */}
       <section>
-        <div className="mb-5 flex items-end justify-between">
-          <h2 className="font-display text-2xl font-semibold text-ink-900">New arrivals</h2>
-          <Link href="/search" className="text-sm font-medium text-brand-700 hover:underline">
-            View all
+        <div className="mb-6 flex items-end justify-between">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900">New arrivals</h2>
+          <Link
+            href="/search"
+            className="group inline-flex items-center gap-1 text-sm font-semibold text-ink-900 transition-all hover:gap-2"
+          >
+            View all <ArrowRight size={15} weight="bold" />
           </Link>
         </div>
         {products.length === 0 ? (

@@ -1,10 +1,7 @@
 "use client";
 
-/* Hallmark · component: filter-bar · genre: modern-minimal · system: BazaarX tokens
- * pre-emit critique: P4 H4 E4 S4 R5 V4 */
-
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Funnel } from "@phosphor-icons/react";
+import { Funnel, SortAscending } from "@phosphor-icons/react";
 
 const SORTS: { value: string; label: string }[] = [
   { value: "relevance", label: "Relevance" },
@@ -14,8 +11,8 @@ const SORTS: { value: string; label: string }[] = [
   { value: "rating", label: "Best rated" },
 ];
 
-const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 outline-none transition-colors focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
+const fieldCls =
+  "h-10 rounded-xl border border-ink-200 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 outline-none transition-colors focus:border-ink-900 focus:ring-4 focus:ring-ink-900/10";
 
 /** Price / rating / sort controls that drive the listing via URL query params. */
 export function FilterBar() {
@@ -32,54 +29,62 @@ export function FilterBar() {
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-4 rounded-2xl border border-ink-200 bg-white p-4">
-      <div className="flex items-center gap-2 self-center pr-1 text-sm font-medium text-ink-700">
-        <Funnel size={16} weight="bold" className="text-brand-700" />
-        Filters
+    <div className="flex flex-col gap-4 rounded-2xl border border-ink-200 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
+      {/* Left cluster — filters */}
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex h-10 items-center gap-2 self-end rounded-xl bg-ink-900 px-3 text-sm font-semibold text-white">
+          <Funnel size={15} weight="fill" />
+          Filters
+        </div>
+
+        <label className="space-y-1.5">
+          <span className="block text-xs font-medium text-ink-500">Min price</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="₹0"
+            defaultValue={params.get("minPrice") ?? ""}
+            onBlur={(e) => setParam("minPrice", e.target.value)}
+            className={`${fieldCls} w-24`}
+          />
+        </label>
+
+        <label className="space-y-1.5">
+          <span className="block text-xs font-medium text-ink-500">Max price</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Any"
+            defaultValue={params.get("maxPrice") ?? ""}
+            onBlur={(e) => setParam("maxPrice", e.target.value)}
+            className={`${fieldCls} w-24`}
+          />
+        </label>
+
+        <label className="space-y-1.5">
+          <span className="block text-xs font-medium text-ink-500">Min rating</span>
+          <select
+            defaultValue={params.get("minRating") ?? ""}
+            onChange={(e) => setParam("minRating", e.target.value)}
+            className={fieldCls}
+          >
+            <option value="">Any</option>
+            <option value="4">4★ &amp; up</option>
+            <option value="3">3★ &amp; up</option>
+            <option value="2">2★ &amp; up</option>
+          </select>
+        </label>
       </div>
 
+      {/* Right cluster — sort */}
       <label className="space-y-1.5">
-        <span className="block text-xs font-medium text-ink-500">Min price</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          defaultValue={params.get("minPrice") ?? ""}
-          onBlur={(e) => setParam("minPrice", e.target.value)}
-          className={`${inputCls} w-24`}
-        />
-      </label>
-
-      <label className="space-y-1.5">
-        <span className="block text-xs font-medium text-ink-500">Max price</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          defaultValue={params.get("maxPrice") ?? ""}
-          onBlur={(e) => setParam("maxPrice", e.target.value)}
-          className={`${inputCls} w-24`}
-        />
-      </label>
-
-      <label className="space-y-1.5">
-        <span className="block text-xs font-medium text-ink-500">Min rating</span>
-        <select
-          defaultValue={params.get("minRating") ?? ""}
-          onChange={(e) => setParam("minRating", e.target.value)}
-          className={inputCls}
-        >
-          <option value="">Any</option>
-          <option value="4">4★ &amp; up</option>
-          <option value="3">3★ &amp; up</option>
-          <option value="2">2★ &amp; up</option>
-        </select>
-      </label>
-
-      <label className="ml-auto space-y-1.5">
-        <span className="block text-xs font-medium text-ink-500">Sort</span>
+        <span className="flex items-center gap-1.5 text-xs font-medium text-ink-500">
+          <SortAscending size={13} weight="bold" /> Sort by
+        </span>
         <select
           defaultValue={params.get("sort") ?? "relevance"}
           onChange={(e) => setParam("sort", e.target.value)}
-          className={inputCls}
+          className={`${fieldCls} w-full sm:w-52`}
         >
           {SORTS.map((s) => (
             <option key={s.value} value={s.value}>

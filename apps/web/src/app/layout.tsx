@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Outfit, DM_Sans } from "next/font/google";
+import { Fraunces, Manrope } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 
-const display = Outfit({
+// Premium pairing: Fraunces (a high-contrast "soft" serif) for editorial
+// headings, Manrope (a refined geometric sans) for body and UI. Swap here.
+const display = Fraunces({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-display",
   display: "swap",
 });
 
-const sans = DM_Sans({
+const sans = Manrope({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
 });
