@@ -23,6 +23,8 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${product.slug}`}
+      data-product-card
+      data-card-image={product.primaryImage ?? ""}
       className="group flex flex-col overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-card transition duration-300 ease-smooth hover:-translate-y-1.5 hover:border-ink-900 hover:shadow-card-hover"
     >
       <div className="relative aspect-square overflow-hidden bg-ink-100">

@@ -25,6 +25,8 @@ export function TopProgress() {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as HTMLElement)?.closest?.("a");
       if (!a) return;
+      // Product cards get their own 3D transition — don't double up.
+      if (a.hasAttribute("data-product-card")) return;
       const href = a.getAttribute("href");
       if (!href || a.target === "_blank" || a.hasAttribute("download")) return;
       if (a.origin !== window.location.origin) return;

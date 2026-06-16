@@ -14,6 +14,7 @@ import { ProductGallery } from "@/components/storefront/product-gallery";
 import { ProductBuyBox } from "@/components/storefront/product-buy-box";
 import { ResellerShare } from "@/components/reseller/reseller-share";
 import { ReviewsSection } from "@/components/storefront/reviews-section";
+import { RouteReadyBeacon } from "@/components/storefront/route-ready-beacon";
 
 export const dynamic = "force-dynamic";
 
@@ -108,6 +109,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       </div>
 
       <ReviewsSection productId={dto.id} />
+      <RouteReadyBeacon />
     </div>
   );
 }
