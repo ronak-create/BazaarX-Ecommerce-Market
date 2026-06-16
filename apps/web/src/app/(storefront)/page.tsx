@@ -19,20 +19,10 @@ import { toProductCard } from "@/lib/product-card";
 export const dynamic = "force-dynamic";
 
 const TRUST = [
-  { icon: ShieldCheck, label: "Secure checkout", tint: "bg-emerald-50 text-emerald-700" },
-  { icon: Truck, label: "Fast delivery", tint: "bg-sky-50 text-sky-700" },
-  { icon: ArrowsCounterClockwise, label: "7-day returns", tint: "bg-amber-50 text-amber-700" },
-  { icon: Money, label: "Cash on delivery", tint: "bg-brand-50 text-brand-700" },
-];
-
-// Soft tints rotated across category tiles for a bit of colour.
-const CAT_TINTS = [
-  "from-brand-50 to-brand-100 text-brand-700",
-  "from-emerald-50 to-emerald-100 text-emerald-700",
-  "from-amber-50 to-amber-100 text-amber-700",
-  "from-sky-50 to-sky-100 text-sky-700",
-  "from-rose-50 to-rose-100 text-rose-600",
-  "from-fuchsia-50 to-fuchsia-100 text-fuchsia-700",
+  { icon: ShieldCheck, label: "Secure checkout" },
+  { icon: Truck, label: "Fast delivery" },
+  { icon: ArrowsCounterClockwise, label: "7-day returns" },
+  { icon: Money, label: "Cash on delivery" },
 ];
 
 export default async function HomePage() {
@@ -97,32 +87,32 @@ export default async function HomePage() {
         ) : (
           <Link
             href="/search"
-            className="group relative block overflow-hidden rounded-2xl border border-ink-200 bg-gradient-to-br from-brand-50 via-white to-sky-50/60 p-4"
+            className="group relative block overflow-hidden rounded-2xl border border-ink-200 bg-ink-50 p-4"
           >
             {/* Decorative sparkles. */}
-            <Sparkle size={26} weight="fill" className="absolute right-6 top-5 text-amber-300" />
-            <Sparkle size={14} weight="fill" className="absolute right-16 top-12 text-amber-200" />
+            <Sparkle size={26} weight="fill" className="absolute right-6 top-5 text-ink-300" />
+            <Sparkle size={14} weight="fill" className="absolute right-16 top-12 text-ink-200" />
 
             <div className="grid h-full min-h-[300px] grid-cols-3 grid-rows-3 gap-3">
-              <div className="col-span-2 row-span-2 flex flex-col justify-between rounded-2xl bg-brand p-5 text-brand-fg shadow-pop">
+              <div className="col-span-2 row-span-2 flex flex-col justify-between rounded-2xl bg-ink-900 p-5 text-white shadow-pop">
                 <ShoppingBag size={34} weight="fill" />
                 <div>
                   <div className="font-display text-xl font-bold leading-tight">Shop the latest drops</div>
-                  <div className="mt-1 inline-flex items-center gap-1 text-sm text-brand-100 transition-transform group-hover:translate-x-0.5">
+                  <div className="mt-1 inline-flex items-center gap-1 text-sm text-ink-300 transition-transform group-hover:translate-x-0.5">
                     Browse all <ArrowRight size={14} weight="bold" />
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+              <div className="flex items-center justify-center rounded-2xl bg-white text-ink-700">
                 <Sparkle size={26} weight="fill" />
               </div>
-              <div className="flex items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+              <div className="flex items-center justify-center rounded-2xl bg-white text-ink-700">
                 <TShirt size={28} weight="fill" />
               </div>
-              <div className="flex items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
+              <div className="flex items-center justify-center rounded-2xl bg-white text-ink-700">
                 <DeviceMobile size={26} weight="fill" />
               </div>
-              <div className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-rose-100 text-rose-600">
+              <div className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-white text-ink-700">
                 <Sneaker size={26} weight="fill" />
                 <span className="font-display text-sm font-semibold">Fashion · Tech · Home &amp; more</span>
               </div>
@@ -131,11 +121,11 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* Trust strip — colour-coded utility row. */}
+      {/* Trust strip — monochrome utility row. */}
       <section className="grid grid-cols-2 divide-ink-200 rounded-2xl border border-ink-200 bg-white sm:grid-cols-4 sm:divide-x">
-        {TRUST.map(({ icon: Icon, label, tint }) => (
+        {TRUST.map(({ icon: Icon, label }) => (
           <div key={label} className="flex items-center gap-3 px-5 py-4">
-            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${tint}`}>
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink-900 text-white">
               <Icon size={18} weight="bold" />
             </span>
             <span className="text-sm font-medium text-ink-700">{label}</span>
@@ -152,23 +142,20 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((c, i) => {
-            const tint = CAT_TINTS[i % CAT_TINTS.length];
-            return (
-              <Link
-                key={c.id}
-                href={`/category/${c.slug}`}
-                className="group flex items-center gap-3 rounded-xl border border-ink-200 bg-white p-3.5 transition-colors hover:border-brand-200 hover:bg-brand-50/40 sm:flex-col sm:items-start sm:gap-2"
-              >
-                <span className={`grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br font-display text-base font-semibold ${tint}`}>
-                  {c.name.charAt(0).toUpperCase()}
-                </span>
-                <span className="text-sm font-medium text-ink-700 transition-colors group-hover:text-brand-700">
-                  {c.name}
-                </span>
-              </Link>
-            );
-          })}
+          {categories.map((c) => (
+            <Link
+              key={c.id}
+              href={`/category/${c.slug}`}
+              className="group flex items-center gap-3 rounded-xl border border-ink-200 bg-white p-3.5 transition-colors hover:border-ink-900 hover:bg-ink-900 sm:flex-col sm:items-start sm:gap-2"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-lg bg-ink-900 font-display text-base font-semibold text-white transition-colors group-hover:bg-white group-hover:text-ink-900">
+                {c.name.charAt(0).toUpperCase()}
+              </span>
+              <span className="text-sm font-medium text-ink-700 transition-colors group-hover:text-white">
+                {c.name}
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 

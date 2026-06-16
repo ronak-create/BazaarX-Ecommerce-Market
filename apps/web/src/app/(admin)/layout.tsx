@@ -2,17 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth";
 import { UserRole } from "@bazaarx/db";
-
-const NAV = [
-  { href: "/admin", label: "Analytics" },
-  { href: "/admin/kyc", label: "Seller KYC" },
-  { href: "/admin/categories", label: "Categories" },
-  { href: "/admin/commissions", label: "Commissions" },
-  { href: "/admin/coupons", label: "Coupons" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/disputes", label: "Disputes" },
-  { href: "/admin/banners", label: "Banners" },
-];
+import { AdminNav } from "@/components/admin/admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -22,33 +12,40 @@ export default async function AdminLayout({
   await requireRole(UserRole.ADMIN);
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r border-ink-800 bg-ink-900 p-4 text-ink-100">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand text-brand-fg">
-            <ShieldCheck size={18} weight="fill" />
-          </span>
-          <span className="font-display text-base font-semibold text-white">Admin</span>
-        </Link>
-        <Link
-          href="/"
-          className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-ink-400 transition-colors hover:text-white"
-        >
-          <ArrowLeft size={14} /> Back to store
-        </Link>
-        <nav className="mt-6 space-y-1">
-          {NAV.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="block rounded-md px-3 py-2 text-sm text-ink-300 transition-colors hover:bg-ink-800"
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
+    <div className="flex min-h-screen bg-ink-50 lg:flex-row">
+      <aside className="sticky top-0 z-30 flex h-[100dvh] w-60 shrink-0 flex-col border-r border-white/10 bg-ink-900 text-ink-100">
+        <div className="px-5 py-5">
+          <Link href="/admin" className="flex items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-ink-900 shadow-pop">
+              <ShieldCheck size={18} weight="fill" />
+            </span>
+            <span className="font-display text-base font-bold tracking-tight text-white">
+              Admin<span className="text-ink-400"> Console</span>
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-ink-400 transition-colors hover:text-white"
+          >
+            <ArrowLeft size={14} /> Back to store
+          </Link>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3 pb-4">
+          <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-ink-500">
+            Manage
+          </div>
+          <AdminNav />
+        </div>
+
+        <div className="border-t border-white/10 px-5 py-4 text-[11px] text-ink-500">
+          BazaarX · Admin access
+        </div>
       </aside>
-      <main className="flex-1 p-8">{children}</main>
+
+      <main className="flex-1 p-6 sm:p-8 lg:p-10">
+        <div className="mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }

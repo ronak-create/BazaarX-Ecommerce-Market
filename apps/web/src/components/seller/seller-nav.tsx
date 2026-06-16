@@ -24,6 +24,9 @@ export function SellerNav() {
 
   return (
     <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">
+      <span className="hidden px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-ink-400 lg:block">
+        Menu
+      </span>
       {NAV.map((n) => {
         const active = n.exact ? pathname === n.href : pathname.startsWith(n.href);
         const Icon = n.icon;
@@ -32,9 +35,9 @@ export function SellerNav() {
             key={n.href}
             href={n.href}
             aria-current={active ? "page" : undefined}
-            className={`inline-flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+            className={`group relative inline-flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
               active
-                ? "bg-brand-50 text-brand-700"
+                ? "bg-ink-900 text-white shadow-pop"
                 : "text-ink-600 hover:bg-ink-100 hover:text-ink-900"
             }`}
           >
