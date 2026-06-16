@@ -22,10 +22,20 @@ export function CouponBanner({ code = "FIRST30", percent = 30 }: { code?: string
   }
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-promo px-6 py-7 text-promo-fg shadow-pop sm:px-10 sm:py-8">
-      {/* Decorative grain of large dots */}
-      <Sparkle weight="fill" className="pointer-events-none absolute -right-4 -top-4 h-28 w-28 text-white/10" />
-      <Sparkle weight="fill" className="pointer-events-none absolute bottom-2 right-24 h-12 w-12 text-white/10" />
+    <div className="relative overflow-hidden rounded-3xl p-[2px] shadow-pop">
+      {/* Travelling border light — two highlights revolve around the edge */}
+      <span
+        aria-hidden
+        className="animate-revolve pointer-events-none absolute left-1/2 top-1/2 h-[250%] w-[250%]"
+        style={{
+          backgroundImage:
+            "conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,0.95) 24deg, rgba(255,255,255,0) 68deg, rgba(255,255,255,0) 180deg, rgba(255,255,255,0.55) 204deg, rgba(255,255,255,0) 248deg, rgba(255,255,255,0) 360deg)",
+        }}
+      />
+      <section className="relative overflow-hidden rounded-[calc(1.5rem-2px)] bg-promo px-6 py-7 text-promo-fg sm:px-10 sm:py-8">
+        {/* Decorative grain of large dots */}
+        <Sparkle weight="fill" className="animate-float pointer-events-none absolute -right-4 -top-4 h-28 w-28 text-white/10" />
+        <Sparkle weight="fill" className="pointer-events-none absolute bottom-2 right-24 h-12 w-12 text-white/10" />
 
       <div className="relative flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -58,6 +68,7 @@ export function CouponBanner({ code = "FIRST30", percent = 30 }: { code?: string
           </Link>
         </div>
       </div>
-    </section>
+      </section>
+    </div>
   );
 }

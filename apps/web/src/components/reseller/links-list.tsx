@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useState } from "react";
 import Link from "next/link";
 import { formatINR } from "@bazaarx/utils";
@@ -17,7 +19,7 @@ export function LinksList() {
     });
   }
 
-  if (isLoading) return <p className="text-sm text-slate-500">Loading links…</p>;
+  if (isLoading) return <InlineLoader />;
   if (!links || links.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">

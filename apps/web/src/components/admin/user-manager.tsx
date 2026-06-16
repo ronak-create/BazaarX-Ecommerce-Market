@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { formatDateTime } from "@bazaarx/utils";
@@ -59,7 +61,7 @@ export function UserManager() {
       </div>
 
       {isLoading || !data ? (
-        <p className="text-sm text-slate-500">Loading…</p>
+        <InlineLoader />
       ) : (
         <table className="w-full text-sm">
           <thead>

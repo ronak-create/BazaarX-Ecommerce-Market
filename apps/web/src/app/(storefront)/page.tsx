@@ -1,10 +1,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  ShieldCheck,
-  Truck,
-  ArrowsCounterClockwise,
-  Money,
   Storefront,
   ShoppingBag,
   TShirt,
@@ -20,20 +16,12 @@ import { toProductCard } from "@/lib/product-card";
 
 export const dynamic = "force-dynamic";
 
-const TRUST = [
-  { icon: ShieldCheck, label: "Secure checkout" },
-  { icon: Truck, label: "Fast delivery" },
-  { icon: ArrowsCounterClockwise, label: "7-day returns" },
-  { icon: Money, label: "Cash on delivery" },
-];
-
 export default async function HomePage() {
-  const [banners, categories, products] = await Promise.all([
+  const [banners, products] = await Promise.all([
     prisma.banner.findMany({
       where: { position: BannerPosition.HOME, isActive: true },
       orderBy: { priority: "desc" },
     }),
-    prisma.category.findMany({ where: { level: 1 }, orderBy: { name: "asc" }, take: 12 }),
     prisma.product.findMany({
       where: { status: ProductStatus.ACTIVE, deletedAt: null },
       orderBy: { createdAt: "desc" },
@@ -128,47 +116,6 @@ export default async function HomePage() {
 
       {/* First-order coupon callout — the single chromatic accent. */}
       <CouponBanner code="FIRST30" percent={30} />
-
-      {/* Trust strip — monochrome utility row. */}
-      <section className="grid grid-cols-2 divide-ink-200 rounded-2xl border border-ink-200 bg-white sm:grid-cols-4 sm:divide-x">
-        {TRUST.map(({ icon: Icon, label }) => (
-          <div key={label} className="flex items-center gap-3 px-5 py-4">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink-900 text-white">
-              <Icon size={18} weight="bold" />
-            </span>
-            <span className="text-sm font-medium text-ink-700">{label}</span>
-          </div>
-        ))}
-      </section>
-
-      {/* Categories — each tile gets a rotating tint. */}
-      <section>
-        <div className="mb-6 flex items-end justify-between">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900">Shop by category</h2>
-          <Link
-            href="/search"
-            className="group inline-flex items-center gap-1 text-sm font-semibold text-ink-900 transition-all hover:gap-2"
-          >
-            Browse all <ArrowRight size={15} weight="bold" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/category/${c.slug}`}
-              className="group flex items-center gap-3 rounded-xl border border-ink-200 bg-white p-3.5 transition-colors hover:border-ink-900 hover:bg-ink-900 sm:flex-col sm:items-start sm:gap-2"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-ink-900 font-display text-base font-semibold text-white transition-colors group-hover:bg-white group-hover:text-ink-900">
-                {c.name.charAt(0).toUpperCase()}
-              </span>
-              <span className="text-sm font-medium text-ink-700 transition-colors group-hover:text-white">
-                {c.name}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
 
       {/* New arrivals. */}
       <section>

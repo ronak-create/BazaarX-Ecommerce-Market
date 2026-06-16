@@ -1,4 +1,25 @@
 /**
+ * Compact inline loader for in-panel / list data-fetch states (replaces plain
+ * "Loading…" text). Same Sandy animation, smaller footprint.
+ */
+export function InlineLoader({ label, className = "" }: { label?: string; className?: string }) {
+  return (
+    <div className={`flex flex-col items-center justify-center gap-2 py-10 ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/sandy-loading.svg"
+        alt=""
+        width={64}
+        height={64}
+        className="h-16 w-16 select-none"
+        draggable={false}
+      />
+      {label ? <span className="text-sm font-medium text-ink-500">{label}</span> : null}
+    </div>
+  );
+}
+
+/**
  * Full-bleed route-transition loader. Rendered by every `loading.tsx` Suspense
  * boundary so navigation shows the Sandy animation instantly instead of the
  * page appearing to hang while the server component streams.

@@ -1,12 +1,14 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useKycQueue } from "@/hooks/use-kyc";
 import { KycReviewPanel } from "./kyc-review-panel";
 
 export function KycQueue() {
   const { data, isLoading, isError, error } = useKycQueue();
 
-  if (isLoading) return <p className="text-sm text-slate-500">Loading queue…</p>;
+  if (isLoading) return <InlineLoader />;
   if (isError) return <p className="text-sm text-red-600">{(error as Error).message}</p>;
 
   const items = data?.data ?? [];

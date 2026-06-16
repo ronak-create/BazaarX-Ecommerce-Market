@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@bazaarx/ui";
@@ -18,7 +20,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   const [reason, setReason] = useState("");
   const [showReturn, setShowReturn] = useState(false);
 
-  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading) return <InlineLoader />;
   if (!order) return <p className="text-sm text-red-600">Order not found.</p>;
 
   return (

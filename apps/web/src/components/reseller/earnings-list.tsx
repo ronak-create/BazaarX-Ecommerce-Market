@@ -1,11 +1,13 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { formatINR, formatDateTime } from "@bazaarx/utils";
 import { useResellerEarnings } from "@/hooks/use-reseller";
 
 export function EarningsList() {
   const { data, isLoading } = useResellerEarnings();
-  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading) return <InlineLoader />;
   if (!data || data.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">

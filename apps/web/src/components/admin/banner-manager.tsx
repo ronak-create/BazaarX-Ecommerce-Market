@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@bazaarx/ui";
@@ -81,7 +83,7 @@ export function BannerManager() {
       </form>
 
       {isLoading || !data ? (
-        <p className="text-sm text-slate-500">Loading…</p>
+        <InlineLoader />
       ) : data.length === 0 ? (
         <p className="text-sm text-slate-500">No banners.</p>
       ) : (

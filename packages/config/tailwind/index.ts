@@ -65,6 +65,11 @@ const preset: Omit<Config, "content"> = {
           "0%": { transform: "translateX(-120%) skewX(-12deg)" },
           "100%": { transform: "translateX(220%) skewX(-12deg)" },
         },
+        // Full rotation for the travelling border-light on the coupon card.
+        revolve: {
+          from: { transform: "translate(-50%, -50%) rotate(0deg)" },
+          to: { transform: "translate(-50%, -50%) rotate(360deg)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.6s cubic-bezier(0.16,1,0.3,1) both",
@@ -73,6 +78,7 @@ const preset: Omit<Config, "content"> = {
         "scale-in": "scale-in 0.4s cubic-bezier(0.16,1,0.3,1) both",
         float: "float 5s ease-in-out infinite",
         kenburns: "kenburns 9s ease-out both",
+        revolve: "revolve 4s linear infinite",
         marquee: `marquee ${marqueeDuration} linear infinite`,
       },
       transitionTimingFunction: {

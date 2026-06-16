@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useQuery } from "@tanstack/react-query";
 import { formatINR } from "@bazaarx/utils";
 import type { AnalyticsDTO } from "@bazaarx/types";
@@ -14,7 +16,7 @@ export function AnalyticsDashboard() {
     },
   });
 
-  if (isLoading || !data) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading || !data) return <InlineLoader />;
 
   const maxRev = Math.max(1, ...data.revenueSeries.map((p) => Number(p.revenue)));
   const cards = [

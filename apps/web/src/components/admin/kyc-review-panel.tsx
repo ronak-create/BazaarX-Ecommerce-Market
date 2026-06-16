@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useEffect, useState } from "react";
 import { Button } from "@bazaarx/ui";
 import { useApproveKyc, useRejectKyc } from "@/hooks/use-kyc";
@@ -61,7 +63,7 @@ export function KycReviewPanel({ item }: { item: KycListItem }) {
         {item.documents.length === 0 ? (
           <p className="text-sm text-slate-400">No documents uploaded.</p>
         ) : docs === null ? (
-          <p className="text-sm text-slate-400">Loading documents…</p>
+          <InlineLoader />
         ) : (
           <div className="mt-1 flex flex-wrap gap-2">
             {docs.map((d) => (

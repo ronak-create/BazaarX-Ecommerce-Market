@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@bazaarx/ui";
@@ -32,7 +34,7 @@ export function CommissionSettings() {
 
   const [edits, setEdits] = useState<Record<string, string>>({});
 
-  if (isLoading || !data) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading || !data) return <InlineLoader />;
 
   return (
     <table className="w-full text-sm">

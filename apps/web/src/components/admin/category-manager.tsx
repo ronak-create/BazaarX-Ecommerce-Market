@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { useState } from "react";
 import { Button } from "@bazaarx/ui";
 import {
@@ -89,7 +91,7 @@ export function CategoryManager() {
       <section>
         <h2 className="mb-3 text-lg font-medium">Category tree</h2>
         {isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <InlineLoader />
         ) : tree && tree.length > 0 ? (
           <Tree nodes={tree} onDelete={(id) => del.mutate(id)} />
         ) : (

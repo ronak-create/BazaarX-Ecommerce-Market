@@ -1,11 +1,13 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import { formatINR } from "@bazaarx/utils";
 import { useResellerDashboard } from "@/hooks/use-reseller";
 
 export function ResellerDashboard() {
   const { data, isLoading } = useResellerDashboard();
-  if (isLoading || !data) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading || !data) return <InlineLoader />;
 
   const cards = [
     { label: "Total earned", value: formatINR(data.totalEarnings) },

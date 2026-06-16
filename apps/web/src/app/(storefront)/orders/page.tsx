@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import Link from "next/link";
 import { formatINR, formatDateTime } from "@bazaarx/utils";
 import { useOrders } from "@/hooks/use-orders";
@@ -8,7 +10,7 @@ import { StatusBadge } from "@/components/orders/status-badge";
 export default function OrdersPage() {
   const { data, isLoading, isError } = useOrders();
 
-  if (isLoading) return <p className="text-sm text-slate-500">Loading orders…</p>;
+  if (isLoading) return <InlineLoader />;
   if (isError) return <p className="text-sm text-red-600">Failed to load orders.</p>;
 
   const orders = data?.data ?? [];

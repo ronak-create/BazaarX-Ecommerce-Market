@@ -1,5 +1,7 @@
 "use client";
 
+import { InlineLoader } from "@/components/loading-screen";
+
 import Link from "next/link";
 import { Button } from "@bazaarx/ui";
 import { formatINR } from "@bazaarx/utils";
@@ -9,7 +11,7 @@ export default function WishlistPage() {
   const { data: items, isLoading } = useWishlist();
   const remove = useRemoveWishlist();
 
-  if (isLoading) return <p className="text-sm text-slate-500">Loading wishlist…</p>;
+  if (isLoading) return <InlineLoader />;
 
   if (!items || items.length === 0) {
     return (
